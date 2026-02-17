@@ -64,120 +64,317 @@ body.mode-exam .option.selected{border-color:var(--orange);background:rgba(255,1
 <div id="view-res" class="content hidden" style="text-align:center"><div class="card"><h2>Results</h2><div style="font-size:50px;font-weight:800;margin:30px 0;color:var(--primary)" id="score"></div><button class="btn-start" onclick="location.reload()">Home</button></div></div>
 <script>
 const DB = [
-    // --- ATMOSPHERE & BASICS ---
-    { id: "A01", topic: "Atmosphere", level: "medium", q: "In the International Standard Atmosphere (ISA), the temperature lapse rate in the troposphere is:", options: ["1.98°C per 1,000 ft (0.65°C per 100 m).", "3.00°C per 1,000 ft.", "Zero (Isothermal).", "2°C per 1,000 ft up to 50,000 ft."], ans: 0, exp: "Standard Lapse Rate.", longExp: "The ISA assumes a linear reduction of 1.98°C (approx 2°C) per 1000 ft until the Tropopause at 11 km." },
-    { id: "A02", topic: "Atmosphere", level: "hard", q: "Flying from High Pressure to Low Pressure at constant Indicated Altitude without adjusting the subscale:", options: ["True Altitude decreases.", "True Altitude increases.", "Remains constant.", "Indicated Altitude increases."], ans: 0, exp: "High to Low, look out below.", longExp: "The altimeter maintains a constant pressure level. Since the outside pressure is lower, that pressure level is physically closer to the ground." },
-    { id: "A03", topic: "Atmosphere", level: "hard", q: "Which conditions produce the highest Density Altitude?", options: ["High Temp, Low Pressure, High Humidity.", "Low Temp, High Pressure, Dry Air.", "Standard Day.", "Cold and Dry."], ans: 0, exp: "Worst performance.", longExp: "Heat expands air, Low pressure de-compresses it, and Humidity (water vapor) is lighter than dry air. All three reduce density." },
-    { id: "A04", topic: "Atmosphere", level: "medium", q: "QNH setting gives:", options: ["Altitude Above Mean Sea Level.", "Height above airfield.", "Pressure Altitude.", "Density Altitude."], ans: 0, exp: "Nautical Height.", longExp: "QNH is the station pressure reduced to MSL using ISA temperature laws. It reads altitude." },
-    { id: "A05", topic: "Basic Aero", level: "medium", q: "Bernoulli's Principle in a venturi tube:", options: ["Velocity increases, Static Pressure decreases.", "Velocity decreases, Pressure increases.", "Both increase.", "Total Pressure increases."], ans: 0, exp: "Conservation of Energy.", longExp: "To maintain mass flow, air speeds up in the constriction. Dynamic pressure rises, so Static pressure must fall." },
-    { id: "A06", topic: "Basic Aero", level: "hard", q: "Stagnation Point characteristics:", options: ["Velocity = 0, Static Pressure = Max.", "Velocity = Max, Pressure = Min.", "Separation point.", "Turbulent flow."], ans: 0, exp: "Impact point.", longExp: "Where the airflow hits the leading edge dead-on and stops. All Dynamic pressure converts to Static pressure." },
-    { id: "A07", topic: "Basic Aero", level: "medium", q: "TAS vs IAS climbing at constant IAS:", options: ["TAS increases.", "TAS decreases.", "TAS remains constant.", "TAS equals Groundspeed."], ans: 0, exp: "Density drops.", longExp: "As density decreases with altitude, you must fly faster through the air (TAS) to get the same pressure reading (IAS)." },
-    
-    // --- LIFT ---
-    { id: "L01", topic: "Lift", level: "medium", q: "Centre of Pressure movement on cambered wing (AoA increasing):", options: ["Moves forward.", "Moves aft.", "Stationary.", "Moves to tip."], ans: 0, exp: "Suction peak forward.", longExp: "As AoA increases, the lowest pressure point shifts to the leading edge. The CP follows this." },
-    { id: "L02", topic: "Lift", level: "hard", q: "Aerodynamic Centre (AC) is defined as:", options: ["Point where Pitching Moment is constant.", "Point where Lift acts.", "Point of max thickness.", "CG location."], ans: 0, exp: "Stability anchor.", longExp: "The AC (approx 25% chord) is where the pitching moment coefficient does not change with AoA." },
-    { id: "L03", topic: "Lift", level: "medium", q: "Geometric Washout (Twist) ensures:", options: ["Root stalls before Tip.", "Tip stalls before Root.", "Increased Lift.", "Less Drag."], ans: 0, exp: "Aileron control.", longExp: "The tip has a lower angle of incidence, so it keeps flying when the root has stalled." },
-    { id: "L04", topic: "Lift", level: "hard", q: "Ground Effect causes:", options: ["Decreased Induced Drag, Increased Effective AoA.", "Increased Drag.", "Decreased Lift.", "Turbulence."], ans: 0, exp: "Vortex blocking.", longExp: "Proximity to ground stops vortices forming, reducing downwash and drag. This causes 'floating'." },
-    { id: "L05", topic: "Lift", level: "medium", q: "Symmetrical Airfoil at 0° AoA:", options: ["Produces 0 Lift.", "Positive Lift.", "Negative Lift.", "Max Drag."], ans: 0, exp: "No camber.", longExp: "Identical pressure on top and bottom means no net vertical force." },
-    
-    // --- DRAG ---
-    { id: "D01", topic: "Drag", level: "medium", q: "Induced Drag varies with speed as:", options: ["1 / V².", "V².", "Linear.", "Constant."], ans: 0, exp: "Inverse square.", longExp: "Slow speed = High AoA = Strong Vortices = High Induced Drag." },
-    { id: "D02", topic: "Drag", level: "medium", q: "Parasite Drag varies with speed as:", options: ["V².", "1 / V².", "Linear.", "Constant."], ans: 0, exp: "Square.", longExp: "Air resistance increases exponentially with speed." },
-    { id: "D03", topic: "Drag", level: "hard", q: "Minimum Drag Speed (Vmd) is where:", options: ["Induced Drag = Parasite Drag.", "Parasite Drag is zero.", "Lift is Max.", "Stall occurs."], ans: 0, exp: "Crossover point.", longExp: "The bottom of the drag bucket is where the two drag curves intersect." },
-    { id: "D04", topic: "Drag", level: "medium", q: "Interference Drag is reduced by:", options: ["Fairings (Fillets).", "Polishing.", "Vortex Generators.", "Winglets."], ans: 0, exp: "Smooth junctions.", longExp: "Fairings smooth the airflow at sharp angles (e.g., wing root) to prevent mixing eddies." },
-    { id: "D05", topic: "Drag", level: "hard", q: "Speed Stability below Vmd:", options: ["Unstable (Speed unstable).", "Stable.", "Neutral.", "Improving."], ans: 0, exp: "Back of the drag curve.", longExp: "If you slow down below Vmd, drag *increases*, causing you to slow further. You must add power." },
-    { id: "D06", topic: "Drag", level: "medium", q: "Form Drag is highest on:", options: ["Flat plate perpendicular to flow.", "Sphere.", "Airfoil.", "Teardrop."], ans: 0, exp: "Separation.", longExp: "A flat plate causes immediate separation and a huge low-pressure wake." },
-    
-    // --- STALLING ---
-    { id: "S01", topic: "Stalling", level: "medium", q: "Stall depends ONLY on:", options: ["Angle of Attack.", "Airspeed.", "Weight.", "Attitude."], ans: 0, exp: "Critical Alpha.", longExp: "Stall happens whenever Critical AoA is exceeded, regardless of speed (e.g., high speed stall)." },
-    { id: "S02", topic: "Stalling", level: "hard", q: "Stall speed in a 60° bank turn:", options: ["Increases by 41%.", "Doubles.", "Increases by 10%.", "Unchanged."], ans: 0, exp: "Load Factor root.", longExp: "Load Factor is 2g. Vs increases by sqrt(2) = 1.41." },
-    { id: "S03", topic: "Stalling", level: "medium", q: "Forward CG effect on Stall Speed:", options: ["Increases Vs.", "Decreases Vs.", "No effect.", "Prevents stall."], ans: 0, exp: "Tail load.", longExp: "Forward CG requires tail downforce. Wings must lift Weight + Tail force, reaching critical AoA sooner." },
-    { id: "S04", topic: "Stalling", level: "medium", q: "Stall warning margin:", options: ["5-10 kts / 5-10% prior to stall.", "At stall.", "After stall.", "20 kts prior."], ans: 0, exp: "Safety.", longExp: "Must alert the pilot with enough time to react (Buffet, Horn, Stick Shaker)." },
-    { id: "S05", topic: "Stalling", level: "hard", q: "Deep Stall (Super Stall) risk:", options: ["T-tail aircraft.", "Low wing.", "Canard.", "Delta."], ans: 0, exp: "Blanketed tail.", longExp: "Wake from stalled main wing covers the high tail, rendering elevators ineffective." },
-    { id: "S06", topic: "Stalling", level: "hard", q: "Spin is defined as:", options: ["Aggravated stall with autorotation.", "Spiral dive.", "Steep turn.", "Roll."], ans: 0, exp: "Stall + Yaw.", longExp: "One wing is more stalled than the other. Drag difference drives rotation." },
-    { id: "S07", topic: "Stalling", level: "hard", q: "Standard Spin Recovery:", options: ["Power Idle, Ailerons Neutral, Rudder Opposite, Stick Fwd.", "Power Max, Stick Back.", "Ailerons into spin.", "Wait."], ans: 0, exp: "PARE.", longExp: "Remove torque (Idle), Remove drag (Neutral), Stop Yaw (Rudder), Unstall (Stick Fwd)." },
-    
-    // --- HIGH LIFT ---
-    { id: "H01", topic: "High Lift", level: "medium", q: "Flaps primarily increase:", options: ["Camber and CLmax.", "Speed.", "Stability.", "Aspect Ratio."], ans: 0, exp: "Curvature.", longExp: "Increasing camber shifts the lift curve up, allowing higher lift at slower speeds." },
-    { id: "H02", topic: "High Lift", level: "hard", q: "Slats function:", options: ["Re-energize boundary layer via slot.", "Increase camber.", "Increase area.", "Drag."], ans: 0, exp: "Delay separation.", longExp: "High pressure air from below accelerates through the slot, keeping airflow attached to higher AoA." },
-    { id: "H03", topic: "High Lift", level: "medium", q: "Fowler Flaps:", options: ["Move back and down (Area + Camber).", "Down only.", "LE device.", "Split."], ans: 0, exp: "Most efficient.", longExp: "Increase wing area (slide back) and camber (rotate down). Highest CL increase." },
-    { id: "H04", topic: "High Lift", level: "hard", q: "Flap effect on Trim (High Wing):", options: ["Pitch Up (Downwash on tail).", "Pitch Down.", "No change.", "Roll."], ans: 0, exp: "Tail load.", longExp: "Increased downwash pushes the tail down, pitching the nose up (e.g., C172)." },
-    
-    // --- STABILITY ---
-    { id: "ST01", topic: "Stability", level: "medium", q: "Static Stability:", options: ["Initial tendency to return.", "Oscillation.", "Control force.", "Time to return."], ans: 0, exp: "Immediate reaction.", longExp: "If disturbed, does the aircraft try to come back? (Positive Static Stability)." },
-    { id: "ST02", topic: "Stability", level: "medium", q: "Longitudinal Stability depends on:", options: ["CG position vs Neutral Point.", "Wing span.", "Rudder.", "Ailerons."], ans: 0, exp: "Pitch balance.", longExp: "CG must be forward of the Neutral Point (Aerodynamic Center of the whole aircraft)." },
-    { id: "ST03", topic: "Stability", level: "hard", q: "Aft CG effect on Stability:", options: ["Reduces stability.", "Increases stability.", "No effect.", "Increases stall speed."], ans: 0, exp: "Short lever arm.", longExp: "Closer to Neutral Point = Less restoring moment. Aircraft becomes twitchy." },
-    { id: "ST04", topic: "Stability", level: "hard", q: "Dutch Roll cause:", options: ["Lateral Stability > Directional Stability.", "Directional > Lateral.", "Forward CG.", "Stall."], ans: 0, exp: "Wallow.", longExp: "Too much dihedral effect causes roll/yaw oscillation." },
-    { id: "ST05", topic: "Stability", level: "medium", q: "Dihedral effect:", options: ["Rolls wings level during sideslip.", "Prevents stall.", "Increases speed.", "Yaw stability."], ans: 0, exp: "Lateral stability.", longExp: "In a slip, the lower wing has higher effective AoA, rolling the aircraft level." },
-    { id: "ST06", topic: "Stability", level: "medium", q: "Stick Force per G:", options: ["Manoeuvre Stability.", "Static Stability.", "Speed Stability.", "Drag."], ans: 0, exp: "Tactile feedback.", longExp: "Prevents pilot from overstressing the airframe by making controls heavy under load." },
-    // --- CONTROLS ---
-    { id: "C01", topic: "Controls", level: "medium", q: "Adverse Yaw is caused by:", options: ["Induced Drag on the up-going wing.", "Parasite drag.", "Rudder.", "Prop torque."], ans: 0, exp: "Lift penalty.", longExp: "The wing rising (outside of turn) creates more lift and thus more drag, pulling the nose outwards." },
-    { id: "C02", topic: "Controls", level: "hard", q: "Frise Ailerons:", options: ["Project leading edge into airflow to create drag.", "Move differentially.", "Mass balance.", "Trim."], ans: 0, exp: "Counter adverse yaw.", longExp: "The up-going aileron's nose sticks out to create parasite drag on the inside wing." },
-    { id: "C03", topic: "Controls", level: "medium", q: "Differential Ailerons:", options: ["Up moves more than Down.", "Down moves more.", "Equal.", "None."], ans: 0, exp: "Drag balance.", longExp: "Minimizes drag increase on the down-going (outside) aileron." },
-    { id: "C04", topic: "Controls", level: "hard", q: "Mass Balance weights:", options: ["Prevent Flutter.", "Trim.", "Reduce stick force.", "Increase stability."], ans: 0, exp: "Inertial coupling.", longExp: "Moves CG of the surface to the hinge line to stop aeroelastic oscillation." },
-    { id: "C05", topic: "Controls", level: "hard", q: "Aerodynamic Balance (Horn):", options: ["Area forward of hinge assists movement.", "Weight.", "Trim.", "Tab."], ans: 0, exp: "Pressure assist.", longExp: "Air pressure on the horn helps the pilot move the control surface." },
-    { id: "C06", topic: "Controls", level: "medium", q: "Balance Tab:", options: ["Moves opposite to surface.", "Moves same way.", "Fixed.", "Trim."], ans: 0, exp: "Reduces force.", longExp: "Airflow on tab helps push the main surface." },
-    { id: "C07", topic: "Controls", level: "medium", q: "Anti-Balance Tab:", options: ["Moves same way as surface.", "Opposite.", "Fixed.", "Trim."], ans: 0, exp: "Increases force.", longExp: "Used on stabilators to give 'feel' (heaviness) to the pilot." },
-    { id: "C08", topic: "Controls", level: "medium", q: "Servo Tab:", options: ["Pilot moves tab, tab moves surface.", "Pilot moves surface.", "Trim.", "Lock."], ans: 0, exp: "No direct link.", longExp: "Used on large aircraft where manual force is insufficient." },
-    
-    // --- OPERATIONAL SCENARIOS ---
-    { id: "OPS_01", topic: "Ops Hazards", level: "hard", q: "Wing Icing effect:", options: ["Unpredictable stall speed increase.", "Weight only.", "Drag only.", "None."], ans: 0, exp: "Shape change.", longExp: "Ice roughness disrupts boundary layer, causing early separation." },
-    { id: "OPS_02", topic: "Ops Hazards", level: "hard", q: "Tailplane Icing:", options: ["Violent Nose Down pitch (Tail stall).", "Nose Up.", "No effect.", "Roll."], ans: 0, exp: "Loss of downforce.", longExp: "If tail stalls, the balancing downforce is lost, and the nose drops." },
-    { id: "OPS_03", topic: "Ops Wake", level: "medium", q: "Wake Turbulence strongest from:", options: ["Heavy, Clean, Slow.", "Light, Fast.", "Dirty, Fast.", "Small."], ans: 0, exp: "High Lift.", longExp: "Heavy (High Lift), Clean (High Alpha), Slow (High Alpha)." },
-    { id: "OPS_04", topic: "Ops Wake", level: "medium", q: "Avoidance on landing behind Heavy:", options: ["Stay above path, land beyond touchdown.", "Land short.", "Fly below.", "Side-step."], ans: 0, exp: "Avoid sink.", longExp: "Vortices sink. Stay high and land long." },
-    { id: "OPS_05", topic: "Ops Aero", level: "hard", q: "Tailwind Takeoff:", options: ["Longer ground run required.", "Shorter.", "Same.", "Better climb."], ans: 0, exp: "Groundspeed.", longExp: "Must accelerate to higher groundspeed to achieve liftoff airspeed." },
-    { id: "OPS_06", topic: "Ops Aero", level: "medium", q: "Hydroplaning speed (kts):", options: ["9 * sqrt(PSI).", "Vref.", "V1.", "7 * PSI."], ans: 0, exp: "Tire pressure.", longExp: "Speed at which tire loses contact with runway." },
-    { id: "OPS_07", topic: "Ops Limits", level: "hard", q: "Va (Manoeuvring Speed) with lower weight:", options: ["Decreases.", "Increases.", "Constant.", "None."], ans: 0, exp: "F=ma.", longExp: "Lighter aircraft accelerates faster into G-load. Must fly slower to stall before breaking." },
-    { id: "OPS_08", topic: "Ops Limits", level: "medium", q: "Vne:", options: ["Never Exceed Speed.", "Normal.", "Cruise.", "Stall."], ans: 0, exp: "Red line.", longExp: "Structural damage or flutter beyond this speed." },
-    { id: "OPS_09", topic: "Ops Windshear", level: "hard", q: "Microburst encounter:", options: ["Headwind -> Downdraft -> Tailwind.", "Tailwind -> Updraft.", "Constant wind.", "Calm."], ans: 0, exp: "Lift trap.", longExp: "Performance increases then collapses." },
-    { id: "OPS_10", topic: "Ops Prop", level: "medium", q: "P-Factor (Asymmetric Blade Effect):", options: ["Yaw to left (high power/high AoA).", "Roll.", "Pitch.", "Drag."], ans: 0, exp: "Descending blade.", longExp: "Descending blade has higher AoA and thrust." },
-    
-    // --- FORMULAS (MATH) ---
-    { id: "F01", topic: "Formulas", level: "medium", q: "Load Factor (n):", options: ["1 / cos(phi)", "sin(phi)", "tan(phi)", "cos(phi)"], ans: 0, exp: "Bank angle.", longExp: "n = Lift/Weight. In a turn, L = W/cos(bank)." },
-    { id: "F02", topic: "Formulas", level: "hard", q: "Vs new vs Weight:", options: ["Vs2 = Vs1 * sqrt(W2/W1)", "Linear", "Square", "None"], ans: 0, exp: "Root relationship.", longExp: "Stall speed varies with the square root of the weight change." },
-    { id: "F03", topic: "Formulas", level: "hard", q: "Turn Radius:", options: ["V^2 / (g tan phi)", "V / tan phi", "V g", "V^2"], ans: 0, exp: "V squared.", longExp: "Radius increases rapidly with speed and decreases with bank angle." },
-    { id: "F04", topic: "Formulas", level: "hard", q: "Rate of Turn:", options: ["g tan phi / V", "V / R", "V tan phi", "Const"], ans: 0, exp: "Inverse V.", longExp: "For a fixed bank, faster speed means slower rate of turn." },
-    { id: "F05", topic: "Formulas", level: "medium", q: "Dynamic Pressure (q):", options: ["1/2 rho V^2", "rho V", "Pt", "V^2"], ans: 0, exp: "Kinetic.", longExp: "Energy of the air motion per unit volume." },
-    { id: "F06", topic: "Formulas", level: "medium", q: "Lift Coefficient:", options: ["L / (q S)", "L q S", "D/L", "q/S"], ans: 0, exp: "Rearranged lift formula.", longExp: "CL is the dimensionless lift capability of the wing." },
-    { id: "F07", topic: "Formulas", level: "hard", q: "Glide Ratio:", options: ["Lift / Drag", "Thrust / Drag", "Weight / Lift", "Speed / Fuel"], ans: 0, exp: "Efficiency.", longExp: "Distance traveled per unit height lost." },
-    { id: "F08", topic: "Formulas", level: "medium", q: "Power:", options: ["Force x Velocity", "Force x Time", "Mass x Accel", "Energy"], ans: 0, exp: "Rate of work.", longExp: "Power is work done over time, or Force times Velocity." },
-    { id: "F09", topic: "Formulas", level: "hard", q: "Climb Gradient:", options: ["(T-D)/W", "L/W", "T/W", "D/L"], ans: 0, exp: "Excess Thrust.", longExp: "The angle of climb depends on Excess Thrust vs Weight." },
-    { id: "F10", topic: "Formulas", level: "hard", q: "Specific Range:", options: ["TAS / Fuel Flow", "GS / Fuel", "Power", "Drag"], ans: 0, exp: "Economy.", longExp: "Distance per unit fuel." },
-    { id: "F11", topic: "Formulas", level: "medium", q: "Pressure (P):", options: ["Force / Area", "Mass / Vol", "Force x Dist", "Energy"], ans: 0, exp: "Pascal.", longExp: "Force applied distributed over an area." },
-    { id: "F12", topic: "Formulas", level: "easy", q: "Density (rho):", options: ["Mass / Volume", "Force / Area", "Weight", "Pressure"], ans: 0, exp: "kg/m3.", longExp: "How tightly packed the matter is." },
-    { id: "F13", topic: "Formulas", level: "hard", q: "Mach Number:", options: ["TAS / LSS", "IAS / LSS", "TAS / GS", "LSS / TAS"], ans: 0, exp: "Speed of Sound.", longExp: "Ratio of True Airspeed to Local Speed of Sound." },
-    { id: "F14", topic: "Formulas", level: "hard", q: "Local Speed of Sound (a):", options: ["38.94 * sqrt(T)", "sqrt(P)", "TAS", "Constant"], ans: 0, exp: "Kelvin.", longExp: "Depends only on the square root of Temperature (Kelvin)." },
-    { id: "F15", topic: "Formulas", level: "medium", q: "Aspect Ratio:", options: ["Span^2 / Area", "Chord", "Thick", "Area"], ans: 0, exp: "Slenderness.", longExp: "Geometric efficiency." },
-    { id: "F16", topic: "Formulas", level: "medium", q: "Moment:", options: ["Force x Arm", "Mass x V", "Power", "Work"], ans: 0, exp: "Turning.", longExp: "Torque." },
-    { id: "F17", topic: "Formulas", level: "hard", q: "Hydroplaning Speed (kts):", options: ["9 * sqrt(PSI)", "7 * PSI", "Vref", "V1"], ans: 0, exp: "Tire Pressure.", longExp: "Rotating tire formula." },
-    { id: "F18", topic: "Formulas", level: "hard", q: "Turn Diameter:", options: ["2 * Radius", "Radius", "V^2", "g"], ans: 0, exp: "Geometry.", longExp: "Simply double the radius." },// --- PACCHETTO 3: ADVANCED STABILITY & CONTROL (The "EASA Killers") ---
-    
-    // --- STABILITY (Advanced) ---
-    { id: "ST_ADV_01", topic: "Stability", level: "hard", q: "The difference between Stick Fixed and Stick Free longitudinal stability is determined by:", options: ["The aerodynamic balance of the elevator (floating tendency).", "The friction in the control circuit.", "The size of the tailplane.", "The position of the CG."], ans: 0, exp: "Floating controls.", longExp: "If the pilot lets go of the stick (Free), the elevator may float with the airflow. If it floats 'against' the restoring force, Stick Free stability is lower than Stick Fixed (held rigid)." },
-    { id: "ST_ADV_02", topic: "Stability", level: "hard", q: "A high wing aircraft generally requires less dihedral than a low wing aircraft because:", options: ["The Centre of Gravity is below the Centre of Pressure, creating a pendulum (Keel) effect.", "The high wing produces more lift.", "The high wing is less affected by ground effect.", "The fuselage interferes with the airflow."], ans: 0, exp: "Pendulum stability.", longExp: "In a sideslip, the weight of the fuselage acts like a pendulum under the high wing, naturally rolling the aircraft back to level. This provides lateral stability without needing much geometric dihedral." },
-    { id: "ST_ADV_03", topic: "Stability", level: "medium", q: "Which of the following creates a nose-down pitching moment?", options: ["The Centre of Pressure moving rearwards.", "Extending landing gear (if drag line is below CG).", "Increasing thrust (if thrust line is below CG).", "Moving the CG rearwards."], ans: 0, exp: "Lever arm increases.", longExp: "Lift acts upwards at the CP. Weight acts downwards at the CG. If the CP moves further aft (away from CG), the lever arm increases, causing the nose to pitch down (typical in Mach Tuck)." },
-    { id: "ST_ADV_04", topic: "Stability", level: "hard", q: "The 'Static Margin' is defined as:", options: ["The distance between the Centre of Gravity and the Neutral Point.", "The distance between the CG and the Centre of Pressure.", "The range of movement of the elevator.", "The difference between Stick Fixed and Stick Free stability."], ans: 0, exp: "Stability buffer.", longExp: "The Static Margin quantifies how stable the aircraft is. A larger margin (CG further forward of Neutral Point) means a very stable, but 'heavy' handling aircraft." },
-    { id: "ST_ADV_05", topic: "Stability", level: "medium", q: "Spiral Instability (Spiral Dive) occurs when:", options: ["Directional Stability is very strong compared to Lateral Stability.", "Lateral Stability is very strong.", "The CG is too far aft.", "The aircraft enters a spin."], ans: 0, exp: "Too much yaw stability.", longExp: "If the fin is too big (Directional) and dihedral too weak (Lateral), the aircraft corrects yaw instantly but fails to roll wings level. The bank angle increases, the nose drops, and speed builds up rapidly." },
+  // =========================
+  // ATMOSPHERE / ALTIMETRY
+  // =========================
+  { id:"A01", topic:"Atmosphere", level:"easy",
+    q:"In ISA, the temperature lapse rate in the troposphere is approximately:",
+    options:["−2°C per 1,000 ft (≈ −6.5°C per km).","−1°C per 1,000 ft.","0°C per 1,000 ft.","−3°C per 1,000 ft."],
+    ans:0, exp:"ISA troposphere lapse rate ≈ −2°C/1,000 ft.", longExp:"Up to ~11 km (~36,000 ft). Then isothermal in ISA."
+  },
+  { id:"A02", topic:"Atmosphere", level:"easy",
+    q:"QNH set on the altimeter gives approximately:",
+    options:["Altitude above mean sea level (AMSL).","Height above airfield elevation.","Pressure altitude.","Density altitude."],
+    ans:0, exp:"QNH → AMSL.", longExp:"QFE → height above airfield; STD 1013.25 → pressure altitude."
+  },
+  { id:"A03", topic:"Atmosphere", level:"medium",
+    q:"Flying from HIGH pressure to LOW pressure without changing the altimeter setting, at constant indicated altitude, true altitude will:",
+    options:["Decrease.","Increase.","Remain constant.","Increase because the altimeter overreads."],
+    ans:0, exp:"High to Low: look out below.", longExp:"Same pressure level becomes physically lower in low-pressure region."
+  },
+  { id:"A04", topic:"Atmosphere", level:"medium",
+    q:"The primary cause of increased density altitude is:",
+    options:["Reduced air density compared to ISA at that pressure altitude.","Increased air density compared to ISA.","Higher static pressure at a given altitude.","Lower humidity at a given altitude."],
+    ans:0, exp:"Density altitude reflects low density (hot/high/ humid).", longExp:"DA ≈ PA corrected for temperature (and humidity effect)."
+  },
+  { id:"A05", topic:"Atmosphere", level:"hard",
+    q:"With 1013.25 hPa set, the altimeter reads 4,000 ft on the ground. This indicates the aerodrome:",
+    options:["Pressure altitude is 4,000 ft.","Elevation is 4,000 ft AMSL.","QNH is 4,000 ft.","Density altitude is 4,000 ft."],
+    ans:0, exp:"STD setting reads pressure altitude.", longExp:"EASA trap: confusing elevation with pressure altitude."
+  },
+  { id:"A06", topic:"Atmosphere", level:"hard",
+    q:"Which condition produces the highest density altitude?",
+    options:["High temperature, low pressure, high humidity.","Low temperature, high pressure, dry air.","ISA temperature, high pressure.","Cold and dry air at low altitude."],
+    ans:0, exp:"Hot + low pressure + humid = worst density.", longExp:"Humidity reduces density because water vapour is lighter than dry air."
+  },
+  { id:"A07", topic:"Atmosphere", level:"hard",
+    q:"If you fly from an area of LOW temperature to HIGH temperature (same pressure setting, same indicated altitude), your true altitude will generally:",
+    options:["Increase.","Decrease.","Remain unchanged.","Become equal to pressure altitude."],
+    ans:0, exp:"Cold to Warm: look out below (in cold you are lower).", longExp:"Colder air shrinks pressure levels closer to ground; entering warmer air raises them → true altitude increases."
+  },
+  { id:"A08", topic:"Atmosphere", level:"medium",
+    q:"The tropopause in ISA is approximately at:",
+    options:["11 km (≈ 36,000 ft).","5.5 km (≈ 18,000 ft).","20 km (≈ 66,000 ft).","8 km (≈ 26,000 ft)."],
+    ans:0, exp:"ISA tropopause ≈ 11 km.", longExp:"ENAC often pairs this with lapse rate questions."
+  },
 
-    // --- CONTROLS (Advanced Tabs) ---
-    { id: "CTL_ADV_01", topic: "Controls", level: "hard", q: "A Spring Tab is designed to:", options: ["Provide aerodynamic assistance only at high speeds.", "Provide assistance at all speeds.", "Increase stick force at high speeds.", "Trim the aircraft."], ans: 0, exp: "Speed sensitive.", longExp: "At low speeds, the spring is rigid and the pilot moves the surface directly. At high speeds, air resistance compresses the spring, and the tab moves to assist the pilot." },
-    { id: "CTL_ADV_02", topic: "Controls", level: "hard", q: "What is the purpose of an Internal Balance (Sealed Aileron)?", options: ["To reduce the force required to move the aileron.", "To prevent air leaking from high to low pressure sides.", "To increase drag.", "To mass balance the surface."], ans: 0, exp: "Pressure assist.", longExp: "A 'beak' forward of the hinge line moves inside a chamber. Pressure differences across the wing assist the movement of the beak, reducing the stick force needed." },
-    { id: "CTL_ADV_03", topic: "Controls", level: "medium", q: "On a Servo-Tab operated control surface:", options: ["The pilot moves the tab, and the tab moves the main surface.", "The pilot moves the main surface, and the tab moves opposite.", "The tab is for trimming only.", "The tab prevents flutter."], ans: 0, exp: "Indirect control.", longExp: "Used on large manual aircraft. The pilot's controls are connected ONLY to the tab. The aerodynamic force on the tab pushes the huge main surface." },
-    
-    // --- STALLING (Wing Shapes) ---
-    { id: "STL_ADV_01", topic: "Stalling", level: "hard", q: "The stalling pattern of a rectangular wing (Planform taper = 1) is typically:", options: ["Starting at the root.", "Starting at the tip.", "Starting at the trailing edge uniformly.", "Instantaneous across the span."], ans: 0, exp: "Desirable.", longExp: "Rectangular wings are safe because the root stalls first. This causes a buffet (warning) on the tail and keeps the ailerons (at the tips) working to control roll." },
-    { id: "STL_ADV_02", topic: "Stalling", level: "hard", q: "The stalling pattern of a highly tapered or swept wing is typically:", options: ["Starting at the tip.", "Starting at the root.", "Uniform.", "Safe."], ans: 0, exp: "Dangerous.", longExp: "Tapered/Swept wings tend to stall at the tips first. This causes a loss of aileron control (roll instability) and, on swept wings, a 'Pitch Up' moment (instability)." },
-    { id: "STL_ADV_03", topic: "Stalling", level: "medium", q: "Vortex Generators on the upper wing surface:", options: ["Energize the boundary layer to delay separation.", "Increase induced drag.", "Reduce parasite drag.", "Prevent shockwaves."], ans: 0, exp: "Mixing air.", longExp: "They create tiny vortices that pull high-energy air from outside the boundary layer down to the skin. This energized air can stick to the wing longer, delaying the stall." },
+  // =========================
+  // BASIC AERO / PRESSURES
+  // =========================
+  { id:"BA01", topic:"Basic Aero", level:"easy",
+    q:"If local airflow velocity increases over a wing surface (subsonic), local static pressure tends to:",
+    options:["Decrease.","Increase.","Remain constant.","Become equal to ambient pressure."],
+    ans:0, exp:"Bernoulli trend: higher V → lower Ps.", longExp:"EASA trap: confusing static vs total vs dynamic."
+  },
+  { id:"BA02", topic:"Basic Aero", level:"medium",
+    q:"At a stagnation point (subsonic), the flow has:",
+    options:["V ≈ 0 and static pressure maximum (≈ total).","V maximum and static pressure minimum.","Separation and turbulence only.","Dynamic pressure maximum and static pressure minimum."],
+    ans:0, exp:"Stagnation: V→0, Ps≈Pt.", longExp:"Pitot measures total (stagnation) pressure."
+  },
+  { id:"BA03", topic:"Basic Aero", level:"hard",
+    q:"At constant IAS during a climb (subsonic), TAS will:",
+    options:["Increase.","Decrease.","Remain constant.","Equal ground speed."],
+    ans:0, exp:"IAS ~ dynamic pressure; density decreases → TAS increases.", longExp:"q=½ρV²: if q constant and ρ↓, V (TAS) ↑."
+  },
+  { id:"BA04", topic:"Basic Aero", level:"hard",
+    q:"The statement 'total pressure is the sum of static and dynamic pressure' is:",
+    options:["Correct (in incompressible/subsonic approximation).","Correct only in supersonic flow.","Incorrect because total pressure equals static pressure.","Incorrect because dynamic pressure includes temperature."],
+    ans:0, exp:"Pt ≈ Ps + q for subsonic incompressible.", longExp:"CBT: In compressible flow you use compressibility corrections, but the conceptual relation is still core."
+  },
+  { id:"BA05", topic:"Basic Aero", level:"medium",
+    q:"If the pitot tube is blocked and the drain hole is blocked, IAS will most likely:",
+    options:["Act like an altimeter (increase in climb, decrease in descent).","Read zero.","Overread at all speeds.","Remain correct."],
+    ans:0, exp:"Trapped total pressure behaves like static system error in altitude changes.", longExp:"Classic pitot-static failure mode question (often in instruments, but used as aero pressure logic)."
+  },
 
-    // --- PROPELLER AERODYNAMICS (Ch 9/10 Context) ---
-    { id: "PROP_01", topic: "Basic Aero", level: "hard", q: "Gyroscopic Precession on a propeller aircraft means that if you pitch the nose UP:", options: ["A yawing force is created 90 degrees later in the direction of rotation.", "The aircraft rolls.", "Torque increases.", "P-factor decreases."], ans: 0, exp: "Rigidity.", longExp: "A force applied to the rim of a gyro (the prop) acts 90° later in the direction of rotation. Pitching up applies a force at the 'top/bottom'. This results in a Yaw force (Right Yaw for CW prop)." },
-    { id: "PROP_02", topic: "Basic Aero", level: "medium", q: "Torque effect (Newtons 3rd Law) causes:", options: ["Roll opposite to propeller rotation.", "Yaw opposite to rotation.", "Pitch up.", "Drag."], ans: 0, exp: "Reaction.", longExp: "The engine twists the prop clockwise (from cockpit). The equal and opposite reaction twists the whole aircraft counter-clockwise (Roll Left)." },
-    { id: "PROP_03", topic: "Basic Aero", level: "medium", q: "Slipstream effect (Spiralling airflow) primarily acts on:", options: ["The vertical fin, causing yaw.", "The wings, causing roll.", "The elevator, causing pitch.", "The ailerons."], ans: 0, exp: "Corkscrew.", longExp: "The air from the prop spirals around the fuselage and hits the vertical fin on the left side (for a CW prop), pushing the tail right and the nose LEFT." },
+  // =========================
+  // LIFT / WING THEORY
+  // =========================
+  { id:"L01", topic:"Lift", level:"easy",
+    q:"For a given configuration, an aerodynamic stall occurs at:",
+    options:["Critical angle of attack.","A particular indicated airspeed.","A particular pitch attitude.","A fixed Mach number."],
+    ans:0, exp:"Stall is AoA-based.", longExp:"Speed/weight/load factor affect AoA required, not critical AoA itself."
+  },
+  { id:"L02", topic:"Lift", level:"medium",
+    q:"The aerodynamic centre (AC) is the point where:",
+    options:["Pitching moment coefficient is approximately constant with AoA.","Lift is maximum.","Centre of pressure is fixed for all AoA.","Drag is minimum."],
+    ans:0, exp:"AC: Cm ~ constant with AoA.", longExp:"Do not confuse AC with CP (moves) or CG."
+  },
+  { id:"L03", topic:"Lift", level:"hard",
+    q:"On a cambered aerofoil (subsonic), as AoA increases (pre-stall), the centre of pressure generally:",
+    options:["Moves forward.","Moves aft.","Remains fixed at 25% chord.","Moves to the tip."],
+    ans:0, exp:"CP tends to move forward with AoA on cambered aerofoils.", longExp:"CBT trap: thinking CP is fixed at 25% (that’s AC-ish)."
+  },
+  { id:"L04", topic:"Lift", level:"medium",
+    q:"Washout (geometric twist) is used mainly to:",
+    options:["Ensure root stalls before tip.","Ensure tip stalls before root.","Increase induced drag.","Increase aspect ratio."],
+    ans:0, exp:"Root-first stall preserves aileron control.", longExp:"Tip stall risks roll-off and loss of ailerons."
+  },
+  { id:"L05", topic:"Lift", level:"hard",
+    q:"In ground effect (same IAS and configuration), the aircraft tends to float mainly because:",
+    options:["Induced drag reduces due to reduced downwash/vortex strength.","Parasite drag increases.","CLmax increases strongly.","Air density increases near the ground."],
+    ans:0, exp:"Ground effect reduces induced drag.", longExp:"Lower induced drag → less sink, higher effective L/D near ground."
+  },
+  { id:"L06", topic:"Lift", level:"medium",
+    q:"For a symmetrical aerofoil at 0° AoA (subsonic), lift is approximately:",
+    options:["Zero.","Positive.","Negative.","Maximum."],
+    ans:0, exp:"No camber → CL≈0 at 0°.", longExp:"Cambered aerofoils have positive CL at 0°."
+  },
+  { id:"L07", topic:"Lift", level:"hard",
+    q:"A high aspect ratio wing, compared to a low aspect ratio wing, generally has:",
+    options:["Lower induced drag for the same lift.","Higher induced drag for the same lift.","Same induced drag but lower parasite drag.","Lower stall speed solely due to AR."],
+    ans:0, exp:"High AR reduces induced drag.", longExp:"Stall speed depends on wing loading and CLmax too."
+  },
+  { id:"L08", topic:"Lift", level:"hard",
+    q:"At constant weight and configuration, if IAS is constant in steady flight (ignore compressibility), then lift is approximately:",
+    options:["Constant.","Increasing with altitude.","Decreasing with altitude.","Unrelated to IAS."],
+    ans:0, exp:"IAS ~ dynamic pressure → lift ~ constant for same AoA/CL.", longExp:"ENAC trap: mixing TAS increase with lift increase; IAS is the key for aerodynamic loads."
+  },
 
-    // --- FINAL TRICKY ONES ---
-    { id: "TRICK_01", topic: "Lift", level: "hard", q: "If the Indicated Airspeed is kept constant while climbing:", options: ["Lift remains constant (ignoring compressibility).", "Lift decreases.", "Lift increases.", "Drag decreases."], ans: 0, exp: "Dynamic pressure const.", longExp: "Lift depends on Dynamic Pressure ($1/2 rho V^2$). IAS is essentially a measure of Dynamic Pressure. If IAS is constant, 'q' is constant, so Lift is constant (assuming same weight/AoA)." },
-    { id: "TRICK_02", topic: "Drag", level: "medium", q: "The speed for Minimum Power (endurance) is:", options: ["Lower than the speed for Minimum Drag (range).", "Higher than Vmd.", "Same as Vmd.", "Vno."], ans: 0, exp: "Vmp < Vmd.", longExp: "Power = Drag x Speed. The minimum of the Power curve occurs at a lower speed (approx 0.76 Vmd) than the minimum of the Drag curve." },
-    { id: "TRICK_03", topic: "Stalling", level: "hard", q: "In a stable spin, the airspeed is:", options: ["Constant and low.", "Increasing rapidly.", "Decreasing.", "Fluctuating."], ans: 0, exp: "Equilibrium.", longExp: "A spin is a stable stalled condition. Drag equals Weight component. The speed is steady and relatively low, unlike a spiral dive where speed increases rapidly." }
+  // =========================
+  // DRAG / PERFORMANCE
+  // =========================
+  { id:"D01", topic:"Drag", level:"easy",
+    q:"Parasite drag varies approximately with:",
+    options:["V².","1/V².","V.","Constant."],
+    ans:0, exp:"Parasite drag ~ V².", longExp:"Skin friction/form/interference scale with dynamic pressure."
+  },
+  { id:"D02", topic:"Drag", level:"easy",
+    q:"Induced drag varies approximately with:",
+    options:["1/V².","V².","V.","Constant."],
+    ans:0, exp:"Induced drag ~ 1/V².", longExp:"Low speed requires high CL → stronger vortices/downwash."
+  },
+  { id:"D03", topic:"Drag", level:"medium",
+    q:"VMD (minimum drag speed) occurs where:",
+    options:["Induced drag equals parasite drag.","Parasite drag is zero.","Lift is maximum.","Thrust required is maximum."],
+    ans:0, exp:"At VMD, induced = parasite.", longExp:"Minimum total drag at the intersection of drag components."
+  },
+  { id:"D04", topic:"Drag", level:"hard",
+    q:"Below VMD, if speed decreases slightly in level flight (no power change), the aircraft tends to:",
+    options:["Decelerate further unless power is increased.","Return to VMD by itself.","Accelerate because drag decreases.","Climb because induced drag decreases."],
+    ans:0, exp:"Back side of the drag/power curve → speed unstable.", longExp:"Classic EASA ‘region of reversed command’ concept."
+  },
+  { id:"D05", topic:"Drag", level:"hard",
+    q:"Interference drag is reduced primarily by:",
+    options:["Fairings/fillets at junctions.","Winglets.","Vortex generators.","Increasing camber."],
+    ans:0, exp:"Fairings smooth junction flow.", longExp:"Winglets reduce induced drag; VGs delay separation."
+  },
+  { id:"D06", topic:"Drag", level:"hard",
+    q:"If CD = CD0 + kCL², the maximum L/D occurs at the point where:",
+    options:["A straight line from the origin is tangent to the drag polar.","CL is maximum (CLmax).","CD is minimum (CD0).","Thrust equals weight."],
+    ans:0, exp:"L/Dmax is the tangent-from-origin point on the polar.", longExp:"CBT killer: they test geometry of drag polar rather than formulas."
+  },
+  { id:"D07", topic:"Drag", level:"medium",
+    q:"For jet aircraft, maximum endurance (min fuel/time) is achieved approximately at:",
+    options:["Minimum drag speed (≈ L/Dmax).","Maximum speed.","Stall speed.","VNE."],
+    ans:0, exp:"Jets: endurance ≈ min drag (best L/D).", longExp:"ENAC trap: props vs jets differ (props: min power for endurance)."
+  },
+
+  // =========================
+  // STALLING / SPIN / LOAD FACTOR
+  // =========================
+  { id:"S01", topic:"Stalling", level:"medium",
+    q:"A 60° bank coordinated level turn has a load factor of approximately:",
+    options:["2.0","1.5","1.0","3.0"],
+    ans:0, exp:"n = 1/cos60 = 2.", longExp:"This drives stall speed increase by √n."
+  },
+  { id:"S02", topic:"Stalling", level:"hard",
+    q:"An aircraft stalls at 60 kt IAS in 1g. In a coordinated level 60° bank turn, stall speed is approximately:",
+    options:["85 kt IAS.","60 kt IAS.","120 kt IAS.","43 kt IAS."],
+    ans:0, exp:"VS × √2 ≈ 1.41 → ~85 kt.", longExp:"Classic ENAC/EASA numbers: 60→85 at 60° bank."
+  },
+  { id:"S03", topic:"Stalling", level:"hard",
+    q:"Forward CG compared with aft CG generally:",
+    options:["Increases stall speed.","Decreases stall speed.","Has no effect on stall speed.","Prevents stall."],
+    ans:0, exp:"Forward CG needs more tail downforce → wing lifts more.", longExp:"Wing must lift W + tail download → higher CL required → higher VS."
+  },
+  { id:"S04", topic:"Stalling", level:"hard",
+    q:"Deep stall is most associated with:",
+    options:["T-tail aircraft.","Low-wing aircraft.","Canard aircraft.","Rectangular wings."],
+    ans:0, exp:"T-tail can be blanketed by stalled wing wake.", longExp:"When tail is in wake, elevator loses authority → recovery difficult."
+  },
+  { id:"S05", topic:"Stalling", level:"hard",
+    q:"A spin is best described as:",
+    options:["An aggravated stall with autorotation.","A spiral dive.","A steep coordinated turn.","A roll oscillation."],
+    ans:0, exp:"Spin = stalled + yaw/autorotation.", longExp:"One wing more stalled → yaw/roll couple sustains rotation."
+  },
+  { id:"S06", topic:"Stalling", level:"hard",
+    q:"Standard spin recovery (generic) is closest to:",
+    options:["Power idle, ailerons neutral, rudder opposite, ease stick forward.","Full power, stick back.","Ailerons into the spin, rudder with spin.","Hold attitude and wait."],
+    ans:0, exp:"PARE logic (Idle/Neutral/Opposite/Forward).", longExp:"Remove yaw and unstall wing; then recover from dive."
+  },
+  { id:"S07", topic:"Stalling", level:"hard",
+    q:"A swept wing is more prone to tip stall primarily due to:",
+    options:["Spanwise flow and outboard separation tendency.","Higher induced drag at the tip.","Lower pressure at the root.","Always higher incidence at the tip."],
+    ans:0, exp:"Sweep drives spanwise flow → tip separation.", longExp:"Devices like fences, twist, and slats manage this."
+  },
+
+  // =========================
+  // HIGH LIFT DEVICES
+  // =========================
+  { id:"H01", topic:"High Lift", level:"medium",
+    q:"Trailing-edge flaps primarily increase:",
+    options:["Camber and CLmax.","Aspect ratio.","Wing sweep.","Mach number."],
+    ans:0, exp:"Flaps increase camber → CLmax.", longExp:"They also add drag (especially large deflections)."
+  },
+  { id:"H02", topic:"High Lift", level:"hard",
+    q:"Leading edge slats mainly:",
+    options:["Delay stall by re-energising the boundary layer via a slot.","Reduce induced drag at cruise.","Increase wing area only.","Move CG forward."],
+    ans:0, exp:"Slot effect delays separation at high AoA.", longExp:"High-energy air from below feeds upper surface, keeping it attached."
+  },
+  { id:"H03", topic:"High Lift", level:"hard",
+    q:"A Fowler flap increases lift effectively because it:",
+    options:["Increases both wing area and camber.","Only increases camber.","Only increases wing area.","Only creates a slot without changing geometry."],
+    ans:0, exp:"Fowler: area↑ + camber↑.", longExp:"It’s among the most effective TE devices for CLmax."
+  },
+  { id:"H04", topic:"High Lift", level:"hard",
+    q:"A split flap is best described as a flap where:",
+    options:["Only the lower surface deflects while upper surface remains essentially fixed.","The flap moves back and down.","The flap forms slots through the flap.","The flap can move up as well as down as an aileron."],
+    ans:0, exp:"Split flap: lower surface only deflects.", longExp:"CBT trap: confuse split with slotted or Fowler."
+  },
+
+  // =========================
+  // STABILITY (UP TO HERE)
+  // =========================
+  { id:"ST01", topic:"Stability", level:"medium",
+    q:"Static stability refers to:",
+    options:["The initial tendency to return to equilibrium after a disturbance.","The time required to return.","The oscillation frequency only.","Control power."],
+    ans:0, exp:"Static = initial tendency.", longExp:"Dynamic stability deals with time history (damping/oscillation)."
+  },
+  { id:"ST02", topic:"Stability", level:"hard",
+    q:"Positive static longitudinal stability requires the CG to be:",
+    options:["Ahead of the neutral point.","Behind the neutral point.","At the centre of pressure.","At the wing aerodynamic centre."],
+    ans:0, exp:"CG ahead of NP → positive static margin.", longExp:"NP is the ‘AC of the whole aircraft’."
+  },
+  { id:"ST03", topic:"Stability", level:"hard",
+    q:"If the CG moves aft toward the neutral point, longitudinal stability generally:",
+    options:["Decreases.","Increases.","Remains unchanged.","Becomes positive regardless of position."],
+    ans:0, exp:"Aft CG reduces static margin.", longExp:"More pitch-sensitive; can approach neutral/negative stability."
+  },
+  { id:"ST04", topic:"Stability", level:"hard",
+    q:"Static margin is the distance between:",
+    options:["CG and neutral point (often as %MAC).","CG and centre of pressure.","Wing AC and tail AC.","Mean aerodynamic chord and wingspan."],
+    ans:0, exp:"Static margin = NP − CG.", longExp:"Bigger margin = more stable but heavier handling."
+  },
+  { id:"ST05", topic:"Stability", level:"hard",
+    q:"Spiral divergence is more likely when:",
+    options:["Directional stability is strong compared to lateral stability.","Lateral stability is strong compared to directional stability.","Longitudinal stability is negative.","The aircraft is stalled."],
+    ans:0, exp:"Too much yaw stability vs dihedral effect → bank can tighten.", longExp:"Slow developing: increasing bank, nose down, speed increase."
+  },
+  { id:"ST06", topic:"Stability", level:"hard",
+    q:"Dutch roll is associated with:",
+    options:["A yaw-roll oscillation linked to dihedral effect vs directional stability/damping.","A pure pitch oscillation.","A spiral dive.","A fully developed spin."],
+    ans:0, exp:"Dutch roll = coupled yaw-roll oscillation.", longExp:"Often on swept wings; yaw damper used."
+  },
+  { id:"ST07", topic:"Stability", level:"hard",
+    q:"A high-wing aircraft generally needs less geometric dihedral mainly because:",
+    options:["It benefits from a pendulum/keel effect (CG below wing) in sideslip.","High wings generate more lift.","High wings have less induced drag.","Winglets replace dihedral."],
+    ans:0, exp:"High wing + CG below gives lateral stability contribution.", longExp:"ENAC trap: ‘more lift’ is irrelevant."
+  },
+  { id:"ST08", topic:"Stability", level:"hard",
+    q:"Stick-free longitudinal stability differs from stick-fixed mainly due to:",
+    options:["Elevator floating tendency (aerodynamic balance of the elevator).","Control friction only.","Wing sweep.","Rudder effectiveness."],
+    ans:0, exp:"Stick-free accounts for elevator floating.", longExp:"Floating can reduce restoring moment compared to stick-fixed."
+  },
+
+  // =========================
+  // FORMULAS (CBT STYLE)
+  // =========================
+  { id:"F01", topic:"Formulas", level:"medium",
+    q:"Dynamic pressure q is:",
+    options:["q = ½ρV²","q = ρV","q = ½ρ/V²","q = Ps + Pt"],
+    ans:0, exp:"q = ½ρV².", longExp:"Pitot-static: q = Pt − Ps."
+  },
+  { id:"F02", topic:"Formulas", level:"hard",
+    q:"In a coordinated level turn with bank angle φ, load factor n equals:",
+    options:["n = 1/cosφ","n = cosφ","n = tanφ","n = 1/tanφ"],
+    ans:0, exp:"n = 1/cosφ.", longExp:"L cosφ = W → L/W = 1/cosφ."
+  },
+  { id:"F03", topic:"Formulas", level:"hard",
+    q:"Stall speed varies with weight as:",
+    options:["VS2 = VS1 × √(W2/W1)","VS2 = VS1 × (W2/W1)","VS2 = VS1 × √(W1/W2)","VS2 = VS1 × (W1/W2)"],
+    ans:0, exp:"VS ∝ √W.", longExp:"ENAC trap: linear scaling."
+  },
+  { id:"F04", topic:"Formulas", level:"hard",
+    q:"Turn radius R for speed V and bank φ is:",
+    options:["R = V²/(g tanφ)","R = V/(g tanφ)","R = g tanφ/V","R = V²/(g cosφ)"],
+    ans:0, exp:"R = V²/(g tanφ).", longExp:"Trap: swapping tan and cos or mixing with rate of turn."
+  },
+  { id:"F05", topic:"Formulas", level:"hard",
+    q:"Rate of turn ω (radians/s) for a coordinated level turn is:",
+    options:["ω = g tanφ / V","ω = V²/(g tanφ)","ω = V/(g tanφ)","ω = g/(V tanφ)"],
+    ans:0, exp:"ω = g tanφ / V.", longExp:"If asked in deg/s multiply by 57.3."
+  },
+  { id:"F06", topic:"Formulas", level:"medium",
+    q:"Lift coefficient CL is:",
+    options:["CL = L/(qS)","CL = L·q·S","CL = q/(LS)","CL = (qS)/L²"],
+    ans:0, exp:"CL = L/(qS).", longExp:"CL is dimensionless."
+  },
+  { id:"F07", topic:"Formulas", level:"hard",
+    q:"Hydroplaning speed (dynamic), knots, is commonly approximated by:",
+    options:["Vp ≈ 9√(PSI)","Vp ≈ 9×PSI","Vp ≈ 7×PSI","Vp ≈ √(PSI)/9"],
+    ans:0, exp:"Vp ≈ 9√PSI.", longExp:"Classic ENAC formula."
+  },
+  { id:"F08", topic:"Formulas", level:"hard",
+    q:"Mach number is:",
+    options:["M = TAS/a","M = IAS/a","M = GS/a","M = a/TAS"],
+    ans:0, exp:"Mach uses TAS over local speed of sound.", longExp:"Local speed of sound mainly depends on temperature."
+  },
+  { id:"F09", topic:"Formulas", level:"hard",
+    q:"Local speed of sound depends primarily on:",
+    options:["Static temperature.","Static pressure only.","Density only.","Humidity only."],
+    ans:0, exp:"a ∝ √T.", longExp:"a = √(γRT). Pressure cancels via ideal gas law."
+  }
 ];
 
 const app={
@@ -261,3 +458,4 @@ app.init();
 </script>
 </body>
 </html>
+
