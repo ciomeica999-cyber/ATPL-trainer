@@ -44,24 +44,73 @@ body.mode-exam .option.selected{border-color:var(--orange);background:rgba(255,1
 </head>
 <body>
 <header><div>ATPL <span style="color:var(--primary)">MASTER</span></div><div id="cnt" style="font-size:14px;color:var(--sub)">Ready</div></header>
+
 <div id="view-home" class="content">
-<div class="card">
-<h2 style="margin-top:0">Training Setup</h2>
-<div style="font-size:13px;color:var(--sub);margin-bottom:20px" id="dbInfo">Loading...</div>
-<div class="mode-row"><div class="mode-btn active-practice" id="m-practice" onclick="app.setM('practice')">🎓 Practice</div><div class="mode-btn" id="m-formulas" onclick="app.setM('formulas')">📐 Formulas</div></div>
-<div class="mode-btn" id="m-exam" onclick="app.setM('exam')" style="margin-bottom:20px">⏱️ Exam Mode</div>
-<div id="dif"><select id="diff-sel"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
-<select id="num-sel"><option value="10">10 Questions</option><option value="20" selected>20 Questions</option><option value="50">50 Questions</option><option value="100">100 Questions</option></select>
-<button class="btn-start" id="btnStart" onclick="app.start()">START SESSION</button>
-<div style="text-align:center;margin-top:20px"><a href="#" onclick="app.wipe()" style="color:var(--sub);font-size:12px">Reset Data</a></div>
-</div></div>
+  <div class="card">
+    <h2 style="margin-top:0">Training Setup</h2>
+    <div style="font-size:13px;color:var(--sub);margin-bottom:20px" id="dbInfo">Loading...</div>
+    <div class="mode-row">
+      <div class="mode-btn active-practice" id="m-practice" onclick="app.setM('practice')">🎓 Practice</div>
+      <div class="mode-btn" id="m-formulas" onclick="app.setM('formulas')">📐 Formulas</div>
+    </div>
+    <div class="mode-btn" id="m-exam" onclick="app.setM('exam')" style="margin-bottom:20px">⏱️ Exam Mode</div>
+    <div id="dif">
+      <select id="diff-sel">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    <select id="num-sel">
+      <option value="10">10 Questions</option>
+      <option value="20" selected>20 Questions</option>
+      <option value="50">50 Questions</option>
+      <option value="100">100 Questions</option>
+    </select>
+    <button class="btn-start" id="btnStart" onclick="app.start()">START SESSION</button>
+    <div style="text-align:center;margin-top:20px">
+      <a href="#" onclick="app.wipe()" style="color:var(--sub);font-size:12px">Reset Data</a>
+    </div>
+  </div>
+</div>
+
 <div id="view-quiz" class="content hidden">
-<div class="card"><div class="q-meta"><span id="qTop"></span><span id="qLvl" style="color:var(--primary)"></span></div>
-<div class="q-text" id="qTxt"></div><div id="opts"></div>
-<div id="expl" class="explanation"><span id="sh-exp"></span><br><button class="btn-deep" onclick="app.deep()">📖 Deep Dive</button></div></div></div>
-<div id="nav" class="nav hidden"><button class="nav-btn" onclick="app.back()">←</button><button class="nav-btn primary" id="act" onclick="app.next()">Next</button><button class="nav-btn" onclick="app.quit()">✕</button></div>
-<div class="modal" id="mod" onclick="app.close(event)"><div class="modal-card"><h2 style="color:var(--primary)">Deep Dive</h2><div id="dp-txt" style="line-height:1.6"></div><button class="btn-start" style="margin-top:20px" onclick="app.close(null)">Close</button></div></div>
-<div id="view-res" class="content hidden" style="text-align:center"><div class="card"><h2>Results</h2><div style="font-size:50px;font-weight:800;margin:30px 0;color:var(--primary)" id="score"></div><button class="btn-start" onclick="location.reload()">Home</button></div></div>
+  <div class="card">
+    <div class="q-meta">
+      <span id="qTop"></span>
+      <span id="qLvl" style="color:var(--primary)"></span>
+    </div>
+    <div class="q-text" id="qTxt"></div>
+    <div id="opts"></div>
+    <div id="expl" class="explanation">
+      <span id="sh-exp"></span><br>
+      <button class="btn-deep" onclick="app.deep()">📖 Deep Dive</button>
+    </div>
+  </div>
+</div>
+
+<div id="nav" class="nav hidden">
+  <button class="nav-btn" onclick="app.back()">←</button>
+  <button class="nav-btn primary" id="act" onclick="app.next()">Next</button>
+  <button class="nav-btn" onclick="app.quit()">✕</button>
+</div>
+
+<div class="modal" id="mod" onclick="app.close(event)">
+  <div class="modal-card">
+    <h2 style="color:var(--primary)">Deep Dive</h2>
+    <div id="dp-txt" style="line-height:1.6"></div>
+    <button class="btn-start" style="margin-top:20px" onclick="app.close(null)">Close</button>
+  </div>
+</div>
+
+<div id="view-res" class="content hidden" style="text-align:center">
+  <div class="card">
+    <h2>Results</h2>
+    <div style="font-size:50px;font-weight:800;margin:30px 0;color:var(--primary)" id="score"></div>
+    <button class="btn-start" onclick="location.reload()">Home</button>
+  </div>
+</div>
+
 <script>
 const DB = [
   // =========================
@@ -376,6 +425,7 @@ const DB = [
     ans:0, exp:"a ∝ √T.", longExp:"a = √(γRT). Pressure cancels via ideal gas law."
   }
 ];
+
 // ---------- helpers: stable shuffle per question ----------
 function _shuffleInPlace(arr){
   for(let i=arr.length-1;i>0;i--){
@@ -398,6 +448,7 @@ function _origToDisp(order, origIdx){ return order.indexOf(origIdx); }
 // ---------- CBT exam config ----------
 const CBT_SECONDS_PER_Q = 60; // change to taste (e.g. 75, 90)
 const LS_KEY = "ATPL_V22_STATE_CBT"; // session persistence (optional)
+const PASS_MARK = 75; // EASA-style pass mark (%)
 
 const app={
   state:{
@@ -785,8 +836,22 @@ const app={
     document.getElementById('nav').classList.add('hidden');
     document.getElementById('view-res').classList.remove('hidden');
 
-    // results text
-    document.getElementById('score').innerText=pct+"%";
+    // results text (PASS/FAIL only in exam)
+    const scoreEl = document.getElementById('score');
+    if(this.state.mode === 'exam'){
+      const pass = pct >= PASS_MARK;
+      scoreEl.innerHTML = `
+        <div style="font-size:54px;font-weight:900;line-height:1">${pct}%</div>
+        <div style="margin-top:10px;font-size:16px;font-weight:800;letter-spacing:1px;color:${pass ? 'var(--ok)' : 'var(--no)'}">
+          ${pass ? 'PASS' : 'FAIL'} <span style="font-size:12px;color:var(--sub);font-weight:700">(≥ ${PASS_MARK}%)</span>
+        </div>
+        <div style="margin-top:8px;font-size:13px;color:var(--sub);font-weight:700">
+          Score: ${correct}/${this.state.pool.length}
+        </div>
+      `;
+    } else {
+      scoreEl.innerText = pct + "%";
+    }
 
     // (optional) small coaching: weak topics
     const wrongIdx=[];
@@ -927,5 +992,3 @@ app.init();
 </script>
 </body>
 </html>
-
-
