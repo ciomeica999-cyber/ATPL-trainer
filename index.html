@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ATPL MASTER v22</title>
 <style>
-/* --- THEME v20 (RESTORED) --- */
 :root{--primary:#007aff;--orange:#ff9f0a;--purple:#af52de;--bg:#f2f2f7;--card:#ffffff;--text:#000;--sub:#6c6c70;--border:#c6c6c8;--ok:#34c759;--no:#ff3b30;--shadow:0 4px 20px rgba(0,0,0,0.1)}
 @media(prefers-color-scheme:dark){:root{--primary:#0a84ff;--bg:#000;--card:#1c1c1e;--text:#fff;--sub:#aeaeb2;--border:#38383a}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
@@ -42,7 +41,6 @@ body.mode-exam .option.selected{border-color:var(--orange);background:rgba(255,1
 @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
 </style>
 </head>
-
 <body>
 <header>
   <div>ATPL <span style="color:var(--primary)">MASTER</span></div>
@@ -69,7 +67,6 @@ body.mode-exam .option.selected{border-color:var(--orange);background:rgba(255,1
       </select>
     </div>
 
-    <!-- ✅ UPDATED: more question counts + ALL -->
     <select id="num-sel">
       <option value="10">10 Questions</option>
       <option value="20" selected>20 Questions</option>
@@ -80,6 +77,14 @@ body.mode-exam .option.selected{border-color:var(--orange);background:rgba(255,1
       <option value="300">300 Questions</option>
       <option value="9999">ALL (all questions)</option>
     </select>
+    <!-- ✅ Focus weak areas (uses your past mistakes) -->
+    <div id="weakWrap" style="display:flex;align-items:center;gap:10px;margin:-6px 0 18px 2px">
+      <input type="checkbox" id="weakToggle" style="transform:scale(1.15)">
+      <label for="weakToggle" style="font-size:13px;color:var(--sub);font-weight:700;cursor:pointer">
+        Focus weak areas (recommended)
+      </label>
+    </div>
+
 
     <button class="btn-start" id="btnStart" onclick="app.start()">START SESSION</button>
     <div style="text-align:center;margin-top:20px">
@@ -133,9 +138,6 @@ body.mode-exam .option.selected{border-color:var(--orange);background:rgba(255,1
 
 <script>
 const DB = [
-  // =========================
-  // ATMOSPHERE / ALTIMETRY
-  // =========================
   { id:"A01", topic:"Atmosphere", level:"easy",
     q:"In ISA, the temperature lapse rate in the troposphere is approximately:",
     options:["−2°C per 1,000 ft (≈ −6.5°C per km).","−1°C per 1,000 ft.","0°C per 1,000 ft.","−3°C per 1,000 ft."],
@@ -177,9 +179,6 @@ const DB = [
     ans:0, exp:"ISA tropopause ≈ 11 km.", longExp:"Correct because ISA defines the tropopause around 11 km where the lapse rate changes. Other values correspond to wrong atmospheric layers/altitudes."
   },
 
-  // =========================
-  // BASIC AERO / PRESSURES
-  // =========================
   { id:"BA01", topic:"Basic Aero", level:"easy",
     q:"If local airflow velocity increases over a wing surface (subsonic), local static pressure tends to:",
     options:["Decrease.","Increase.","Remain constant.","Become equal to ambient pressure."],
@@ -206,9 +205,6 @@ const DB = [
     ans:0, exp:"Trapped total pressure behaves like static system error in altitude changes.", longExp:"Correct because trapped pitot pressure makes the ASI behave like an altimeter: changes in static pressure change the differential incorrectly. The other options correspond to different failure modes."
   },
 
-  // =========================
-  // LIFT / WING THEORY
-  // =========================
   { id:"L01", topic:"Lift", level:"easy",
     q:"For a given configuration, an aerodynamic stall occurs at:",
     options:["Critical angle of attack.","A particular indicated airspeed.","A particular pitch attitude.","A fixed Mach number."],
@@ -250,9 +246,6 @@ const DB = [
     ans:0, exp:"IAS ~ dynamic pressure → lift ~ constant for same AoA/CL.", longExp:"Correct because aerodynamic forces scale with dynamic pressure (IAS proxy). TAS changes with altitude, but IAS relates to the pressure load on the wing."
   },
 
-  // =========================
-  // DRAG / PERFORMANCE
-  // =========================
   { id:"D01", topic:"Drag", level:"easy",
     q:"Parasite drag varies approximately with:",
     options:["V².","1/V².","V.","Constant."],
@@ -289,9 +282,6 @@ const DB = [
     ans:0, exp:"Jets: endurance ≈ min drag (best L/D).", longExp:"Correct because jet endurance relates closely to minimum thrust required (minimum drag), typically near L/Dmax. Props differ (min power)."
   },
 
-  // =========================
-  // STALLING / SPIN / LOAD FACTOR
-  // =========================
   { id:"S01", topic:"Stalling", level:"medium",
     q:"A 60° bank coordinated level turn has a load factor of approximately:",
     options:["2.0","1.5","1.0","3.0"],
@@ -328,9 +318,6 @@ const DB = [
     ans:0, exp:"Sweep drives spanwise flow → tip separation.", longExp:"Correct because sweep promotes spanwise flow toward the tip, increasing outboard boundary layer thickening and separation tendency."
   },
 
-  // =========================
-  // HIGH LIFT DEVICES
-  // =========================
   { id:"H01", topic:"High Lift", level:"medium",
     q:"Trailing-edge flaps primarily increase:",
     options:["Camber and CLmax.","Aspect ratio.","Wing sweep.","Mach number."],
@@ -352,9 +339,6 @@ const DB = [
     ans:0, exp:"Split flap: lower surface only deflects.", longExp:"Correct because in a split flap only the lower panel deflects. Fowler is back-and-down. Slotted has slots. Flaperon is aileron-like."
   },
 
-  // =========================
-  // STABILITY (UP TO HERE)
-  // =========================
   { id:"ST01", topic:"Stability", level:"medium",
     q:"Static stability refers to:",
     options:["The initial tendency to return to equilibrium after a disturbance.","The time required to return.","The oscillation frequency only.","Control power."],
@@ -396,9 +380,6 @@ const DB = [
     ans:0, exp:"Stick-free accounts for elevator floating.", longExp:"Correct because stick-free allows the elevator to float aerodynamically, changing the tail moment response and reducing stability compared to stick-fixed."
   },
 
-  // =========================
-  // FORMULAS (CBT STYLE)
-  // =========================
   { id:"F01", topic:"Formulas", level:"medium",
     q:"Dynamic pressure q is:",
     options:["q = ½ρV²","q = ρV","q = ½ρ/V²","q = Ps + Pt"],
@@ -443,91 +424,503 @@ const DB = [
     q:"Local speed of sound depends primarily on:",
     options:["Static temperature.","Static pressure only.","Density only.","Humidity only."],
     ans:0, exp:"a ∝ √T.", longExp:"Correct because a = √(γRT), mainly dependent on temperature. Pressure cancels with ideal gas relationship."
+  },
+
+  // =========================
+  // EXTRA (HARD / REASONING)
+  // =========================
+  { id:"A09", topic:"Atmosphere", level:"medium",
+    q:"In ISA, if you climb within the troposphere while maintaining constant Mach number, IAS will generally:",
+    options:["Decrease.","Increase.","Remain constant.","Become zero at the tropopause."],
+    ans:0, exp:"IAS tends to decrease with altitude at constant Mach.", longExp:"At a given Mach, true airspeed increases with local speed of sound, but air density decreases with altitude. IAS is linked to dynamic pressure; for the same Mach at higher altitude, dynamic pressure is lower, so IAS reduces. The other options do not reflect the density effect on IAS."
+  },
+  { id:"A10", topic:"Atmosphere", level:"medium",
+    q:"At a given pressure altitude, compared to ISA, a higher temperature will result in:",
+    options:["Higher density altitude.","Lower density altitude.","No change in density altitude.","Higher pressure altitude."],
+    ans:0, exp:"Hotter than ISA → density altitude increases.", longExp:"Density altitude is pressure altitude corrected primarily for temperature. Warmer air is less dense, so the aircraft behaves as if it were at a higher altitude (higher DA). Pressure altitude itself is set by pressure and does not change with temperature."
+  },
+  { id:"A11", topic:"Atmosphere", level:"hard",
+    q:"When flying with QNH set, entering a region with a LOWER QNH (without resetting), the altimeter indication will:",
+    options:["Overread the true altitude.","Underread the true altitude.","Remain correct.","Read pressure altitude."],
+    ans:0, exp:"High-to-low without reset → altimeter overreads.", longExp:"If you keep the old (higher) setting and the actual QNH is lower, the instrument will indicate higher than your true altitude (you are lower than indicated). Underread would occur in the opposite transition (low to high)."
+  },
+  { id:"A12", topic:"Atmosphere", level:"hard",
+    q:"Which statement about humidity and density altitude is most accurate?",
+    options:["Higher humidity increases density altitude (all else equal).","Higher humidity decreases density altitude (all else equal).","Humidity has no effect on density.","Humidity changes pressure altitude only."],
+    ans:0, exp:"Humid air is less dense than dry air.", longExp:"Water vapour has a lower molecular weight than dry air, so adding humidity reduces air density at the same pressure and temperature, increasing density altitude. The effect is smaller than temperature but conceptually in this direction."
+  },
+  { id:"A13", topic:"Atmosphere", level:"medium",
+    q:"Above the ISA tropopause (ISA stratosphere lower part), temperature is approximately:",
+    options:["Constant with altitude.","Increasing with altitude.","Decreasing with altitude at −2°C/1000 ft.","Unrelated to altitude."],
+    ans:0, exp:"ISA isothermal layer at tropopause.", longExp:"In the ISA model, from ~11 km upward temperature is initially constant (isothermal) before later increasing in higher stratosphere. The options with decrease or increase do not match this segment."
+  },
+  { id:"A14", topic:"Atmosphere", level:"hard",
+    q:"You are at FL100 (STD set). Actual temperature is well below ISA. Compared to ISA, true altitude for a given indicated (pressure) altitude is:",
+    options:["Lower.","Higher.","Unchanged.","Equal to density altitude."],
+    ans:0, exp:"Cold air → true altitude lower than indicated.", longExp:"Cold air shrinks pressure levels closer to the ground. With the same pressure altitude indicated, your true height above MSL is lower in colder-than-ISA conditions. This is why cold temperature corrections are used for obstacle clearance."
+  },
+  { id:"A15", topic:"Atmosphere", level:"medium",
+    q:"If you keep constant IAS in a climb, the lift coefficient CL in steady, level flight requirement would tend to:",
+    options:["Remain approximately constant (ignoring compressibility).","Increase strongly with altitude.","Decrease strongly with altitude.","Become zero near the tropopause."],
+    ans:0, exp:"IAS is a proxy for dynamic pressure.", longExp:"At constant configuration and weight in steady flight, required lift equals weight. With IAS held constant, dynamic pressure is roughly constant, so for the same lift you need similar CL. TAS changes, but IAS is the relevant aerodynamic scaling."
+  },
+  { id:"A16", topic:"Atmosphere", level:"hard",
+    q:"At constant TAS, as altitude increases, Mach number will generally:",
+    options:["Increase.","Decrease.","Remain constant.","Become undefined."],
+    ans:0, exp:"Speed of sound decreases with temperature.", longExp:"Mach = TAS / a. In the troposphere temperature decreases with altitude, so speed of sound decreases, so Mach increases for the same TAS. (Near/above tropopause the trend depends on temperature profile.)"
+  },
+  { id:"A17", topic:"Atmosphere", level:"medium",
+    q:"The main practical effect of a high density altitude on takeoff is:",
+    options:["Longer takeoff distance due to reduced engine/prop thrust and reduced lift.","Shorter takeoff distance due to reduced drag.","No effect if IAS is used.","Higher stall speed due to lower density."],
+    ans:0, exp:"High DA reduces performance.", longExp:"High density altitude reduces air density, so for a given IAS, true airspeed is higher and acceleration is worse; engines/props produce less thrust/power. Lift at a given true speed is reduced, so more runway is needed. Stall speed in IAS is essentially unchanged for a given weight/config."
+  },
+  { id:"A18", topic:"Atmosphere", level:"hard",
+    q:"Which is the best statement about pressure altitude (PA)?",
+    options:["PA is the altitude in ISA at which the pressure equals the ambient pressure.","PA is always equal to true altitude.","PA includes temperature correction.","PA equals QNH altitude."],
+    ans:0, exp:"PA is a pressure reference altitude.", longExp:"Pressure altitude is the ISA altitude corresponding to the observed pressure (altimeter with 1013.25 hPa). It does not include temperature correction (that is density altitude), and it is not generally equal to true altitude."
+  },
+  { id:"A19", topic:"Atmosphere", level:"medium",
+    q:"At a given field elevation, lowering QNH (weather system) will cause pressure altitude to:",
+    options:["Increase.","Decrease.","Remain unchanged.","Become equal to density altitude."],
+    ans:0, exp:"Lower QNH → higher pressure altitude.", longExp:"With lower sea-level pressure, the ambient pressure at the field is lower, corresponding to a higher ISA pressure altitude. This is why low pressure can degrade performance even at the same elevation."
+  },
+  { id:"A20", topic:"Atmosphere", level:"hard",
+    q:"At constant IAS, compared to sea level, at higher altitude the aircraft true airspeed is higher. The main reason is:",
+    options:["Lower air density requires higher TAS to produce the same dynamic pressure.","Higher air density requires higher TAS.","Higher temperature always increases IAS.","Induced drag increases with altitude."],
+    ans:0, exp:"q = ½ρV².", longExp:"IAS is related to dynamic pressure. If IAS (q) is held constant and density decreases with altitude, true speed V must increase to keep q the same. The other options contradict this fundamental relationship."
+  },
+  { id:"BA06", topic:"Basic Aero", level:"medium",
+    q:"In subsonic flow, dynamic pressure q is best described as:",
+    options:["The kinetic energy per unit volume of the airflow.","The static pressure of the air.","The total (stagnation) pressure.","A measure depending only on temperature."],
+    ans:0, exp:"q relates to kinetic energy density.", longExp:"Dynamic pressure is proportional to ½ρV², representing kinetic energy per unit volume. Static and total pressures are different quantities; temperature affects density but q is not only temperature."
+  },
+  { id:"BA07", topic:"Basic Aero", level:"hard",
+    q:"A pitot tube blocked but drain hole open will cause IAS to:",
+    options:["Read zero.","Act like an altimeter.","Overread in climb.","Remain correct."],
+    ans:0, exp:"Blocked pitot with drain open → no total pressure.", longExp:"With the pitot inlet blocked and drain open, the pitot line vents to ambient, so total pressure is lost and ASI reads near zero. The 'altimeter-like' behaviour requires both pitot and drain blocked (trapped total pressure)."
+  },
+  { id:"BA08", topic:"Basic Aero", level:"hard",
+    q:"Static port blockage in level flight (with pitot OK) will most likely cause IAS during a climb to:",
+    options:["Underread.","Overread.","Remain correct.","Read zero."],
+    ans:1, exp:"Trapped static makes ASI overread in climb.", longExp:"If static pressure is trapped at a lower-altitude (higher pressure) value, during a climb actual static pressure decreases but the instrument still uses the old higher static, increasing Pt−Ps indicated, so IAS overreads. Underread occurs in descent."
+  },
+  { id:"BA09", topic:"Basic Aero", level:"medium",
+    q:"For an airfoil at small angles of attack (pre-stall), increasing AoA generally causes the pressure coefficient on the upper surface to:",
+    options:["Become more negative (lower pressure).","Become less negative (higher pressure).","Remain unchanged.","Increase above ambient everywhere."],
+    ans:0, exp:"Higher AoA increases suction on upper surface.", longExp:"As AoA increases (within linear range), circulation increases and upper-surface suction typically increases (more negative Cp). Near stall this trend breaks down due to separation."
+  },
+  { id:"BA10", topic:"Basic Aero", level:"hard",
+    q:"Which is the most correct relationship for total pressure in compressible subsonic flow?",
+    options:["Total pressure is still the stagnation pressure, but losses can occur across shocks (not typical subsonic).","Total pressure always equals static plus dynamic with no correction.","Total pressure equals static only.","Total pressure depends only on humidity."],
+    ans:0, exp:"Concept: stagnation pressure with compressibility effects.", longExp:"In compressible flow, 'Pt = Ps + q' is not exact, but total pressure remains the stagnation pressure concept. Across shocks (supersonic), total pressure loss occurs. The other statements are incorrect."
+  },
+  { id:"BA11", topic:"Basic Aero", level:"medium",
+    q:"In steady, level flight at constant IAS, if you increase weight, the required angle of attack will:",
+    options:["Increase.","Decrease.","Remain constant.","Become negative."],
+    ans:0, exp:"More lift required → higher CL → higher AoA.", longExp:"At the same IAS (dynamic pressure), to produce more lift you need higher CL. In the linear region, CL increases with AoA, so AoA must increase."
+  },
+  { id:"BA12", topic:"Basic Aero", level:"hard",
+    q:"At a given IAS, if you deploy flaps that increase CL for the same AoA, to maintain level flight you will generally need to:",
+    options:["Reduce AoA (lower pitch) for the same lift.","Increase AoA.","Increase speed significantly.","Accept a stall."],
+    ans:0, exp:"More lift for same AoA means you can fly at lower AoA.", longExp:"Flap deployment increases camber/CL0 and often CLα, so for a given required lift you can achieve it at a lower AoA (and/or lower speed). The trade is added drag and possible pitch moment changes."
+  },
+  { id:"BA13", topic:"Basic Aero", level:"medium",
+    q:"The centre of pressure moves most with changes in:",
+    options:["Angle of attack.","Air density only.","Temperature only.","Gross weight only."],
+    ans:0, exp:"CP depends on pressure distribution.", longExp:"CP is the point where resultant aerodynamic force acts and it moves as the pressure distribution changes, primarily with AoA (and configuration). Density affects magnitude, not the non-dimensional location in the same way."
+  },
+  { id:"BA14", topic:"Basic Aero", level:"hard",
+    q:"If a wing is operating at constant CL and you increase air density (same TAS), lift will:",
+    options:["Increase.","Decrease.","Remain constant.","Become zero."],
+    ans:0, exp:"L = q S CL; q increases with density.", longExp:"At constant TAS, q = ½ρV² increases with density. With CL constant, lift increases proportionally."
+  },
+  { id:"BA15", topic:"Basic Aero", level:"medium",
+    q:"In a steady climb at constant IAS, the margin to stall in terms of AoA is generally:",
+    options:["Similar to level flight at the same IAS (configuration dependent).","Much larger because TAS is higher.","Much smaller because altitude is higher.","Always zero because climb implies stall."],
+    ans:0, exp:"Stall is AoA-based; IAS is a proxy for CL.", longExp:"For a given configuration and weight, IAS relates to dynamic pressure. At the same IAS, the required CL (and thus AoA) is similar, so AoA margin to stall is similar. TAS being higher doesn't directly change AoA margin."
+  },
+  { id:"L09", topic:"Lift", level:"medium",
+    q:"For a given weight and configuration, the primary benefit of increasing wing area is:",
+    options:["Lower stall speed.","Higher Mach buffet margin.","Lower TAS at a given IAS.","Higher pressure altitude."],
+    ans:0, exp:"Bigger area lowers wing loading.", longExp:"Stall speed varies with √(W/(S·CLmax)). Increasing S lowers wing loading and reduces stall speed. The other options are not primary effects of wing area."
+  },
+  { id:"L10", topic:"Lift", level:"hard",
+    q:"Compared to a rectangular wing, a strongly tapered wing (without twist) is more likely to:",
+    options:["Stall at the tip first.","Stall at the root first.","Never stall.","Have no change in stall behaviour."],
+    ans:0, exp:"Taper increases tip loading tendency.", longExp:"Taper can increase lift distribution toward the tip, raising local CL and making tip stall more likely unless mitigated with twist, washout, or devices. Tip stall reduces aileron effectiveness."
+  },
+  { id:"L11", topic:"Lift", level:"hard",
+    q:"A slotted flap (compared to a plain flap) primarily improves maximum lift by:",
+    options:["Energising the boundary layer and delaying separation on the flap/upper surface.","Reducing induced drag at high speed.","Increasing aspect ratio.","Reducing wing area."],
+    ans:0, exp:"Slot delays separation.", longExp:"The slot allows high-energy air to flow to the upper surface behind the slot, delaying separation at high deflection and increasing CLmax."
+  },
+  { id:"L12", topic:"Lift", level:"medium",
+    q:"The aerodynamic centre of a subsonic wing (whole aircraft wing) is typically located near:",
+    options:["25% of mean aerodynamic chord.","50% of mean aerodynamic chord.","0% chord (leading edge).","75% of mean aerodynamic chord."],
+    ans:0, exp:"AC ~ quarter-chord (subsonic).", longExp:"For typical subsonic airfoils/wings, the aerodynamic centre is near 25% MAC. It's not fixed at 50% or 75%."
+  },
+  { id:"L13", topic:"Lift", level:"hard",
+    q:"If you increase aspect ratio while keeping wing area constant, the wingspan will:",
+    options:["Increase.","Decrease.","Remain constant.","Become equal to chord."],
+    ans:0, exp:"AR = b²/S; if S constant, higher AR → higher b.", longExp:"Aspect ratio relates span and area. With fixed area, increasing AR requires larger span and smaller average chord."
+  },
+  { id:"L14", topic:"Lift", level:"medium",
+    q:"Which statement about lift coefficient CL is most correct?",
+    options:["CL depends mainly on AoA and configuration (within pre-stall range).","CL depends mainly on altitude.","CL depends mainly on gross weight.","CL depends mainly on runway length."],
+    ans:0, exp:"CL is aerodynamic/geometry dependent.", longExp:"CL is a non-dimensional coefficient driven by AoA, Reynolds/Mach effects and configuration. Weight affects required CL, not the aerodynamic CL at a given AoA/config."
+  },
+  { id:"L15", topic:"Lift", level:"hard",
+    q:"A winglet primarily reduces induced drag by:",
+    options:["Reducing the strength of wingtip vortices (effective span increase).","Reducing skin friction drag.","Increasing CLmax significantly.","Reducing parasite drag due to smoother surface."],
+    ans:0, exp:"Winglets reduce induced losses.", longExp:"Winglets modify the wingtip flow, reducing vortex strength and increasing effective aspect ratio, thereby reducing induced drag. They don't primarily reduce skin friction or significantly increase CLmax."
+  },
+  { id:"L16", topic:"Lift", level:"hard",
+    q:"In ground effect, for the same lift, the required angle of attack is generally:",
+    options:["Lower.","Higher.","Unchanged.","Random."],
+    ans:0, exp:"Less induced angle needed.", longExp:"Ground effect reduces downwash and induced angle of attack, so for the same lift the wing can operate at slightly lower geometric AoA. This contributes to reduced induced drag and the 'float' effect."
+  },
+  { id:"L17", topic:"Lift", level:"medium",
+    q:"If the centre of pressure moves forward as AoA increases, the pitching moment about the leading edge becomes more:",
+    options:["Nose-down.","Nose-up.","Zero.","Independent of lift."],
+    ans:1, exp:"Forward CP tends to increase nose-up moment about LE.", longExp:"With resultant force acting more forward, the moment arm about the leading edge changes. Depending on sign convention, a forward shift generally increases nose-up pitching moment about the leading edge. The key is CP movement changes pitching moment."
+  },
+  { id:"L18", topic:"Lift", level:"hard",
+    q:"At the same weight and flap setting, increasing load factor (e.g., in a turn) requires, for the same speed:",
+    options:["Higher CL and higher AoA.","Lower CL and lower AoA.","No change in CL.","Lower AoA because lift increases automatically."],
+    ans:0, exp:"More lift required.", longExp:"Required lift is n·W. At the same speed (q), you need higher CL to produce more lift, which means higher AoA (pre-stall). This is why stall speed increases with load factor."
+  },
+  { id:"L19", topic:"Lift", level:"medium",
+    q:"The lift curve slope (CLα) of a finite wing compared to an infinite wing (2D airfoil) is generally:",
+    options:["Lower.","Higher.","The same.","Zero."],
+    ans:0, exp:"Finite wing has induced effects.", longExp:"A finite wing has downwash and induced angle of attack, reducing effective lift curve slope compared to 2D airfoil theory."
+  },
+  { id:"L20", topic:"Lift", level:"hard",
+    q:"A key reason for using leading-edge devices on swept wings is to:",
+    options:["Reduce spanwise flow effects and delay tip stall.","Increase parasite drag at cruise.","Move the CG aft.","Eliminate dihedral effect."],
+    ans:0, exp:"Manage sweep-related separation.", longExp:"Swept wings are prone to spanwise flow and outboard separation; leading-edge devices (slats) help keep flow attached at high AoA and improve stall behaviour."
+  },
+  { id:"D08", topic:"Drag", level:"medium",
+    q:"At constant weight, in level flight, the speed for minimum power required (prop aircraft) is compared to VMD:",
+    options:["Lower than VMD.","Equal to VMD.","Higher than VMD.","Independent of drag curve."],
+    ans:0, exp:"Min power occurs at lower speed than min drag.", longExp:"For a prop-driven aircraft, power required is drag × speed, which shifts the minimum to a lower speed than minimum drag speed. Jets (thrust-limited) use minimum drag for endurance."
+  },
+  { id:"D09", topic:"Drag", level:"hard",
+    q:"If you increase weight in level flight, the speed for minimum drag (VMD) will generally:",
+    options:["Increase.","Decrease.","Remain constant.","Become stall speed."],
+    ans:0, exp:"Higher weight shifts best L/D speed up.", longExp:"Induced drag increases with higher required lift coefficient. The minimum-drag point occurs at a higher speed to reduce CL and induced drag; thus VMD increases with weight."
+  },
+  { id:"D10", topic:"Drag", level:"medium",
+    q:"For a given lift, induced drag is reduced by:",
+    options:["Increasing aspect ratio.","Increasing wing loading.","Increasing flap deflection.","Reducing wing area."],
+    ans:0, exp:"Higher AR lowers induced drag.", longExp:"Induced drag is inversely proportional to aspect ratio for given lift coefficient (and includes Oswald efficiency). Increasing wing loading generally increases required CL at a given speed, increasing induced drag."
+  },
+  { id:"D11", topic:"Drag", level:"hard",
+    q:"The Oswald efficiency factor e mainly accounts for:",
+    options:["Non-elliptical lift distribution and viscous effects increasing induced drag.","Skin friction drag at high speed.","Compressibility drag rise.","Ground effect."],
+    ans:0, exp:"e reflects induced drag efficiency.", longExp:"e captures how close the wing is to ideal elliptical lift distribution and other losses that increase induced drag above the ideal. It's not a skin friction or compressibility parameter."
+  },
+  { id:"D12", topic:"Drag", level:"medium",
+    q:"In the region of reversed command (back side), maintaining altitude while slowing down typically requires:",
+    options:["More power.","Less power.","Same power.","No power because drag decreases."],
+    ans:0, exp:"Power required rises as speed decreases below VMD.", longExp:"Below VMD, induced drag increases rapidly; total drag (and power required) increases as you slow down, so you need more power to maintain altitude/IAS."
+  },
+  { id:"D13", topic:"Drag", level:"hard",
+    q:"At very high subsonic Mach numbers, a rapid increase in drag is mainly due to:",
+    options:["Wave drag associated with local supersonic flow/shock formation.","Induced drag increase.","Interference drag only.","Ground effect."],
+    ans:0, exp:"Compressibility effects.", longExp:"As Mach increases, local flow can reach supersonic and form shock waves, causing wave drag and separation. This is the drag divergence phenomenon."
+  },
+  { id:"D14", topic:"Drag", level:"medium",
+    q:"If you fly at the speed for maximum L/D, small speed changes around that point will generally:",
+    options:["Increase total drag in either direction.","Decrease total drag in either direction.","Not change total drag at all.","Eliminate induced drag."],
+    ans:0, exp:"Minimum drag point.", longExp:"At minimum total drag, moving either slower (more induced drag) or faster (more parasite drag) increases total drag."
+  },
+  { id:"D15", topic:"Drag", level:"hard",
+    q:"Extending landing gear in flight primarily increases:",
+    options:["Parasite drag.","Induced drag.","Lift curve slope.","Aspect ratio."],
+    ans:0, exp:"Gear adds form/interference drag.", longExp:"Landing gear increases form and interference drag, which are components of parasite drag. It does not directly increase induced drag (except indirectly through changed trim)."
+  },
+  { id:"D16", topic:"Drag", level:"medium",
+    q:"For a given aircraft, best glide speed (no wind) in a jet or glider is closest to:",
+    options:["Speed for maximum L/D.","Speed for minimum power required.","Stall speed.","VNE."],
+    ans:0, exp:"Best glide at L/Dmax.", longExp:"Maximum range (glide distance) comes from maximum lift-to-drag ratio, which occurs at the tangent point of the drag polar."
+  },
+  { id:"D17", topic:"Drag", level:"hard",
+    q:"If you increase flap deflection significantly, the speed for maximum L/D will generally:",
+    options:["Decrease.","Increase.","Remain unchanged.","Become equal to VNE."],
+    ans:0, exp:"High drag configuration shifts best L/D to lower speed.", longExp:"Flaps increase drag and often change CL characteristics. In high-drag configurations, L/Dmax is reduced and the optimum speed usually decreases; in practice, best glide is worse with flaps."
+  },
+  { id:"S08", topic:"Stalling", level:"medium",
+    q:"In a coordinated turn, the reason stall speed increases is primarily because:",
+    options:["The wing must generate more lift than weight (n·W).","The air is thinner in a turn.","Bank angle increases temperature.","Induced drag becomes zero."],
+    ans:0, exp:"Load factor increases required lift.", longExp:"In a level turn, lift must equal weight divided by cos(bank), so required lift increases. To produce more lift at the same speed, AoA must increase, reaching critical AoA at a higher speed."
+  },
+  { id:"S09", topic:"Stalling", level:"hard",
+    q:"If you pull up to 2g in level flight, stall speed changes approximately by:",
+    options:["×√2 (about +41%).","×2 (double).","÷√2 (about −29%).","No change."],
+    ans:0, exp:"VS ∝ √n.", longExp:"Stall speed scales with the square root of load factor. Doubling g does not double stall speed; it increases by √2."
+  },
+  { id:"S10", topic:"Stalling", level:"hard",
+    q:"Aft CG generally makes an aircraft:",
+    options:["Less stable and with lower stall speed but reduced stall warning margin.","More stable and with higher stall speed.","Less stable and with higher stall speed.","More stable and with lower stall speed."],
+    ans:0, exp:"Aft CG reduces stability; may reduce stall speed due to less tail download.", longExp:"Moving CG aft reduces static margin and can reduce required tail download, lowering wing lift requirement and potentially lowering stall speed. However, stall characteristics/warning may worsen."
+  },
+  { id:"S11", topic:"Stalling", level:"medium",
+    q:"During a spin, recovery is achieved primarily by:",
+    options:["Reducing AoA below critical and stopping yaw/autorotation.","Increasing bank angle to level wings.","Adding power to blow the tail.","Pulling back to increase lift."],
+    ans:0, exp:"Unstall + stop yaw.", longExp:"A spin is a stalled, autorotative condition. Recovery requires stopping the yaw (opposite rudder) and reducing AoA (forward stick) to unstall the wings; then recover from the dive."
+  },
+  { id:"S12", topic:"Stalling", level:"hard",
+    q:"Which condition most increases the risk of an incipient spin?",
+    options:["Stall with significant yaw (uncoordinated).","High speed with wings level.","Shallow descent with coordinated rudder.","Cruise flight at low AoA."],
+    ans:0, exp:"Yaw at stall triggers autorotation.", longExp:"A spin requires stall and yaw. Uncoordinated stall can cause one wing to stall more than the other, initiating autorotation."
+  },
+  { id:"S13", topic:"Stalling", level:"medium",
+    q:"If you extend flaps, the stall speed in IAS typically:",
+    options:["Decreases.","Increases.","Remains unchanged.","Becomes equal to VNE."],
+    ans:0, exp:"Flaps increase CLmax.", longExp:"Flaps generally increase CLmax, reducing stall speed (in IAS) for a given weight. There are exceptions for certain high-speed devices, but standard TE flaps reduce VS."
+  },
+  { id:"S14", topic:"Stalling", level:"hard",
+    q:"Compared to a straight wing, a swept wing stall is often more hazardous because:",
+    options:["Tip stall and pitch-up/roll-off tendencies are more likely.","It always stalls at higher AoA.","It has no buffet warning.","It cannot be recovered."],
+    ans:0, exp:"Sweep drives spanwise flow.", longExp:"Spanwise flow can cause outboard separation, reducing aileron effectiveness and causing abrupt roll-off or pitch-up. Swept wings can still have buffet warning and are recoverable."
+  },
+  { id:"S15", topic:"Stalling", level:"medium",
+    q:"When icing forms on the leading edge, stall speed generally:",
+    options:["Increases.","Decreases.","Remains the same.","Depends only on QNH."],
+    ans:0, exp:"Ice reduces CLmax.", longExp:"Ice contamination disrupts the airfoil shape and boundary layer, reducing CLmax and increasing drag, which raises stall speed and worsens handling."
+  },
+  { id:"S16", topic:"Stalling", level:"hard",
+    q:"In a level turn at constant IAS, increasing bank angle (and load factor) will generally require:",
+    options:["More back pressure (higher AoA).","Less back pressure (lower AoA).","No change in AoA.","Forward pressure."],
+    ans:0, exp:"Higher n requires higher CL.", longExp:"To maintain altitude as bank increases, required lift rises, requiring higher CL and AoA, thus more back pressure in a conventional aircraft."
+  },
+  { id:"S17", topic:"Stalling", level:"hard",
+    q:"A 'mushing' stall (in some aircraft) is best described as:",
+    options:["A stall with high sink rate and little pitch break.","A spin.","A spiral dive.","A normal climb."],
+    ans:0, exp:"Soft stall characteristic.", longExp:"Some aircraft stall gently with little nose drop but significant sink, called mushing. It is still a stall condition (wing partly separated) and must be recovered by reducing AoA."
+  },
+  { id:"S18", topic:"Stalling", level:"medium",
+    q:"In general, the most effective immediate action to recover from an impending stall is to:",
+    options:["Reduce angle of attack.","Increase power only.","Roll wings level only.","Pull back smoothly."],
+    ans:0, exp:"AoA is the root cause.", longExp:"A stall is AoA-based; reducing AoA is the fundamental recovery step. Power helps reduce height loss but without reducing AoA the stall can persist."
+  },
+  { id:"S19", topic:"Stalling", level:"hard",
+    q:"Deep stall risk in a T-tail is particularly high when:",
+    options:["The tailplane is blanketed by the wing wake at high AoA.","The CG is far forward.","Flaps are retracted.","The aircraft is in ground effect."],
+    ans:0, exp:"Tail effectiveness loss.", longExp:"At high AoA, the wake from a stalled wing can blanket the T-tail, preventing the elevator from producing a nose-down moment to reduce AoA, making recovery difficult."
+  },
+  { id:"H05", topic:"High Lift", level:"medium",
+    q:"The main disadvantage of extending flaps is:",
+    options:["Increased drag and possible pitch moment/trim changes.","Reduced CLmax.","Reduced wing area.","Higher aspect ratio."],
+    ans:0, exp:"Flaps trade lift for drag.", longExp:"Flaps increase lift capability but add drag and often change pitching moment requiring trim. They generally increase, not reduce, CLmax."
+  },
+  { id:"H06", topic:"High Lift", level:"hard",
+    q:"A Krueger flap is a leading-edge device that primarily:",
+    options:["Increases camber on the lower leading edge and delays stall.","Acts as a spoiler to reduce lift.","Increases wing sweep.","Reduces wing area."],
+    ans:0, exp:"LE camber/slot effect depending on design.", longExp:"Krueger flaps deploy from the lower surface at the leading edge, increasing camber and improving low-speed performance and stall margin."
+  },
+  { id:"H07", topic:"High Lift", level:"medium",
+    q:"Compared to plain flaps, Fowler flaps typically provide:",
+    options:["A larger increase in CLmax due to increased area and camber.","Less drag at landing.","No change in wing area.","Lower lift at takeoff."],
+    ans:0, exp:"Fowler is very effective.", longExp:"Fowler flaps extend aft, increasing wing area, and deflect, increasing camber, resulting in large CLmax increase. Drag also increases significantly."
+  },
+  { id:"H08", topic:"High Lift", level:"hard",
+    q:"Slats are particularly effective at high AoA because they:",
+    options:["Allow higher-energy air to flow to the upper surface, keeping it attached.","Reduce parasite drag by sealing gaps.","Reduce induced drag by increasing span.","Lower the critical Mach number."],
+    ans:0, exp:"Boundary layer re-energising.", longExp:"The slat forms a slot that feeds high-energy air to the upper surface, delaying separation at high AoA and increasing stall angle/CLmax."
+  },
+  { id:"H09", topic:"High Lift", level:"medium",
+    q:"Deploying spoilers in flight primarily:",
+    options:["Reduces lift and increases drag.","Increases lift and reduces drag.","Moves the CG.","Increases CLmax."],
+    ans:0, exp:"Spoilers spoil lift.", longExp:"Spoilers disrupt airflow, reducing lift and increasing drag. They are used for descent rate control, roll assist, and lift dump on landing."
+  },
+  { id:"H10", topic:"High Lift", level:"hard",
+    q:"Which high-lift device is most directly aimed at improving aileron effectiveness near stall?",
+    options:["Washout / twist.","Spoilers.","Winglets.","Fuselage strakes."],
+    ans:0, exp:"Root-first stall maintains ailerons.", longExp:"Washout helps ensure the root stalls before the tip, keeping airflow attached over the ailerons longer. Spoilers can assist roll but do not primarily shape stall sequence."
+  },
+  { id:"H11", topic:"High Lift", level:"medium",
+    q:"A flap setting that provides maximum takeoff performance (short field) typically balances:",
+    options:["Increased lift with acceptable drag.","Maximum drag with maximum lift.","Minimum lift with minimum drag.","No change in aerodynamics."],
+    ans:0, exp:"Takeoff flap is a compromise.", longExp:"Too much flap creates excessive drag and may reduce climb gradient; too little flap increases takeoff speed. A moderate flap provides higher CL at a manageable drag penalty."
+  },
+  { id:"H12", topic:"High Lift", level:"hard",
+    q:"Leading-edge droop (fixed or variable) mainly helps by:",
+    options:["Reducing leading-edge pressure peak and delaying separation at high AoA.","Reducing wing area.","Increasing induced drag.","Increasing stall speed."],
+    ans:0, exp:"Improves attachment at high AoA.", longExp:"Droop changes the LE shape to manage pressure distribution, delaying separation and improving stall characteristics. It does not increase stall speed; it usually reduces it."
+  },
+  { id:"ST09", topic:"Stability", level:"medium",
+    q:"For positive static longitudinal stability, an increase in AoA should produce a pitching moment that tends to:",
+    options:["Decrease AoA (nose-down).","Increase AoA (nose-up).","Have no effect.","Roll the aircraft."],
+    ans:0, exp:"Restoring moment is nose-down for AoA increase.", longExp:"If disturbed to higher AoA, a stable aircraft produces a restoring nose-down moment to return toward trim AoA. A nose-up response would be statically unstable."
+  },
+  { id:"ST10", topic:"Stability", level:"hard",
+    q:"Increasing the tailplane downforce (more negative tail lift) in trim generally:",
+    options:["Requires the wing to produce more lift, increasing induced drag.","Reduces required wing lift, reducing induced drag.","Moves the neutral point aft.","Eliminates static margin."],
+    ans:0, exp:"Tail downforce adds to required wing lift.", longExp:"The aircraft must balance moments. If the tail pushes down more, the wing must lift more to support weight plus tail download, increasing required CL and induced drag."
+  },
+  { id:"ST11", topic:"Stability", level:"medium",
+    q:"Static directional stability is mainly provided by:",
+    options:["The vertical tail (fin).","The horizontal tail.","Wing dihedral.","Flap deflection."],
+    ans:0, exp:"Fin provides yaw restoring moment.", longExp:"A sideslip produces a side force on the vertical tail that creates a restoring yawing moment. Dihedral mainly relates to lateral stability."
+  },
+  { id:"ST12", topic:"Stability", level:"hard",
+    q:"If directional stability is very strong and dihedral effect is weak, the aircraft is more prone to:",
+    options:["Spiral divergence.","Dutch roll.","Phugoid.","Short-period oscillation."],
+    ans:0, exp:"Spiral stability balance.", longExp:"Strong directional stability (weathercock) with weak lateral stability (dihedral effect) can lead to spiral divergence. Dutch roll often arises when both are strong but yaw damping is insufficient."
+  },
+  { id:"ST13", topic:"Stability", level:"hard",
+    q:"Dutch roll damping is improved primarily by:",
+    options:["A yaw damper / increased directional damping.","More elevator authority.","More flap deflection.","Reducing wing loading."],
+    ans:0, exp:"Yaw damping fixes dutch roll.", longExp:"Dutch roll is a coupled yaw/roll oscillation; increasing yaw damping (yaw damper, larger fin/rudder effectiveness) reduces oscillations."
+  },
+  { id:"ST14", topic:"Stability", level:"medium",
+    q:"The phugoid mode is primarily an exchange between:",
+    options:["Kinetic and potential energy (speed and altitude).","Yaw and roll.","Angle of attack and pitch rate.","Lift and drag only."],
+    ans:0, exp:"Long-period longitudinal oscillation.", longExp:"Phugoid involves slow oscillations where the aircraft trades speed for altitude and back, with relatively small AoA changes compared to short-period."
+  },
+  { id:"ST15", topic:"Stability", level:"hard",
+    q:"Short-period longitudinal mode is characterised mainly by:",
+    options:["Rapid changes in AoA and pitch rate with little change in airspeed.","Large changes in airspeed and altitude.","Yaw-roll coupling.","Very slow oscillations."],
+    ans:0, exp:"Short-period = fast AoA/pitch dynamics.", longExp:"Short-period is a fast, heavily damped (in stable aircraft) mode dominated by AoA and pitch rate. Phugoid is the slow speed/altitude exchange."
+  },
+  { id:"ST16", topic:"Stability", level:"medium",
+    q:"Static lateral stability is mainly associated with the aircraft response in:",
+    options:["Roll due to sideslip (dihedral effect).","Pitch due to elevator.","Yaw due to rudder.","Lift due to flaps."],
+    ans:0, exp:"Dihedral effect drives roll response to sideslip.", longExp:"In sideslip, dihedral effect (including wing position, sweep, dihedral) generates a restoring rolling moment."
+  },
+  { id:"ST17", topic:"Stability", level:"hard",
+    q:"Wing sweep contributes to lateral stability because in a sideslip the:",
+    options:["Advancing wing experiences higher effective AoA and lift, creating a restoring roll moment.","Tailplane loses lift.","Fin produces less side force.","Flaps become more effective."],
+    ans:0, exp:"Sweep adds dihedral effect.", longExp:"In sideslip, sweep causes asymmetric lift distribution (advancing wing sees higher effective AoA), producing a restoring roll moment (dihedral effect)."
+  },
+  { id:"ST18", topic:"Stability", level:"hard",
+    q:"Stick-free longitudinal stability is usually less than stick-fixed because:",
+    options:["Elevator float reduces the restoring pitching moment.","The pilot always over-controls.","The CG moves forward when hands-off.","The tailplane disappears."],
+    ans:0, exp:"Elevator free to move.", longExp:"With stick free, aerodynamic hinge moments can move the elevator toward a new equilibrium, reducing the tail's restoring effectiveness compared to a fixed elevator."
+  },
+  { id:"ST19", topic:"Stability", level:"medium",
+    q:"If CG is moved forward (all else equal), the required tailplane downforce in trim generally:",
+    options:["Increases.","Decreases.","Becomes zero.","Changes sign to upward."],
+    ans:0, exp:"Forward CG increases nose-down moment to balance.", longExp:"A forward CG creates a larger nose-down moment about the aerodynamic centre, requiring more tail downforce (nose-up moment from tail) to trim."
+  },
+  { id:"ST20", topic:"Stability", level:"hard",
+    q:"Moving the CG aft (toward the neutral point) will generally:",
+    options:["Reduce stick forces per g and reduce static stability.","Increase stick forces per g and increase stability.","Reduce elevator effectiveness.","Eliminate the need for trim."],
+    ans:0, exp:"Aft CG = lighter, less stable.", longExp:"Aft CG reduces static margin, making pitch response more sensitive and reducing stick force gradient. It can also reduce required tail download, affecting trim and stall behaviour."
+  },
+  { id:"ST21", topic:"Stability", level:"medium",
+    q:"A bobweight in the control system is primarily used to:",
+    options:["Increase stick force with load factor (g).","Reduce stick force with g.","Lock the elevator at high speed.","Increase yaw stability."],
+    ans:0, exp:"Bobweight adds artificial feel.", longExp:"A bobweight creates an inertial force proportional to g that increases stick force as load factor increases, improving 'feel' and reducing over-stressing risk."
+  },
+  { id:"ST22", topic:"Stability", level:"hard",
+    q:"Aerodynamic damping in pitch mainly arises because a pitching rate produces:",
+    options:["A change in effective AoA along the tail/wing that creates a moment opposing the rate.","A permanent change in weight.","A change in gravity.","No aerodynamic effect."],
+    ans:0, exp:"Rate creates opposing moment.", longExp:"Pitch rate changes local flow angle, producing incremental lift forces that generate a moment opposing the rate, damping oscillations."
+  },
+  { id:"ST23", topic:"Stability", level:"hard",
+    q:"A 'neutral point' moving forward (e.g., due to flap extension in some aircraft) with CG fixed tends to:",
+    options:["Reduce static margin and stability.","Increase static margin and stability.","Have no effect.","Only affect yaw stability."],
+    ans:0, exp:"Static margin = NP − CG.", longExp:"If NP moves forward toward the CG, static margin decreases, reducing longitudinal stability. Configuration changes can shift NP by altering lift distribution and tail effectiveness."
+  },
+  { id:"F10", topic:"Formulas", level:"medium",
+    q:"For a given configuration, stall speed increases with load factor n approximately as:",
+    options:["VS ∝ √n","VS ∝ n","VS ∝ 1/√n","VS ∝ 1/n"],
+    ans:0, exp:"VS scales with square root of n.", longExp:"Because required lift increases with n and lift ∝ V², speed must increase with √n to reach the same CLmax."
+  },
+  { id:"F11", topic:"Formulas", level:"hard",
+    q:"In a coordinated level turn, if bank angle increases from 30° to 60°, the load factor changes from about:",
+    options:["1.15 to 2.0","1.5 to 3.0","1.0 to 2.0","2.0 to 3.0"],
+    ans:0, exp:"n = 1/cosφ.", longExp:"At 30°, cos≈0.866 so n≈1.15; at 60°, cos=0.5 so n=2.0."
+  },
+  { id:"F12", topic:"Formulas", level:"hard",
+    q:"If weight increases by 21% (W2/W1=1.21) in the same configuration, stall speed changes by approximately:",
+    options:["+10%"," +21%","−10%","No change"],
+    ans:0, exp:"VS ∝ √W.", longExp:"√1.21 ≈ 1.10, so stall speed increases about 10%."
+  },
+  { id:"F13", topic:"Formulas", level:"medium",
+    q:"If density decreases by 20% and you want to keep the same dynamic pressure q, true airspeed must:",
+    options:["Increase by about 11%.","Decrease by 20%.","Remain constant.","Increase by 20%."],
+    ans:0, exp:"q=½ρV² ⇒ V ∝ 1/√ρ.", longExp:"If ρ₂=0.8ρ₁, then V₂/V₁=√(1/0.8)=√1.25≈1.118 (≈+12%)."
+  },
+  { id:"F14", topic:"Formulas", level:"hard",
+    q:"In a coordinated level turn, rate of turn increases when you:",
+    options:["Increase bank angle and decrease speed.","Decrease bank angle and increase speed.","Increase speed at same bank.","Decrease bank at same speed."],
+    ans:0, exp:"ω = g tanφ / V.", longExp:"Rate of turn is proportional to tan(bank) and inversely proportional to speed. So more bank and less speed increases ω."
+  },
+  { id:"F15", topic:"Formulas", level:"medium",
+    q:"In the drag polar CD = CD0 + kCL², induced drag corresponds to the term:",
+    options:["kCL²","CD0","CD","CL"],
+    ans:0, exp:"Induced drag varies with CL².", longExp:"CD0 represents parasite drag at zero lift; kCL² captures induced drag growth with lift coefficient."
+  },
+  { id:"F16", topic:"Formulas", level:"hard",
+    q:"If you double true airspeed at the same altitude (ignore compressibility), parasite drag will change by approximately:",
+    options:["×4","×2","×1/2","No change"],
+    ans:0, exp:"Parasite drag ∝ V².", longExp:"Doubling speed increases dynamic pressure by four, so parasite drag approximately quadruples."
+  },
+  { id:"F17", topic:"Formulas", level:"hard",
+    q:"If you halve speed in level flight (same weight/config), induced drag will change approximately by:",
+    options:["×4","×2","×1/4","No change"],
+    ans:0, exp:"Induced drag ∝ 1/V².", longExp:"Halving speed increases induced drag by a factor of four (in the simplified model)."
   }
+
 ];
 
-// ---------- helpers: stable shuffle per question ----------
-function _shuffleInPlace(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-  return arr;
-}
-function _getOrder(state, q){
-  if(!state.orderMap) state.orderMap = {};
-  if(state.orderMap[q.id]) return state.orderMap[q.id];
-  const order=[0,1,2,3];
-  _shuffleInPlace(order);
-  state.orderMap[q.id]=order;
-  return order;
-}
+// shuffle + stable order
+function _shuffleInPlace(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function _getOrder(state, q){ if(!state.orderMap) state.orderMap = {}; if(state.orderMap[q.id]) return state.orderMap[q.id]; const order=[0,1,2,3]; _shuffleInPlace(order); state.orderMap[q.id]=order; return order; }
 function _dispToOrig(order, dispIdx){ return order[dispIdx]; }
-function _origToDisp(order, origIdx){ return order.indexOf(origIdx); }
 
-// ---------- CBT exam config ----------
-const CBT_SECONDS_PER_Q = 60;   // change to taste (e.g. 75, 90)
+// CBT config
+const CBT_SECONDS_PER_Q = 60;
 const LS_KEY = "ATPL_V22_STATE_CBT";
-
-// ✅ PASS/FAIL style EASA (default 75%)
 const PASS_MARK = 75;
 
-function _esc(s){
-  return String(s)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
-}
+// ✅ Focus Weak Areas stats
+const STATS_KEY = "ATPL_V22_STATS";
 
-function _fmtTime(sec){
-  sec = Math.max(0, sec|0);
-  const mm = Math.floor(sec/60);
-  const ss = String(sec%60).padStart(2,'0');
-  return `${mm}:${ss}`;
+// de-dupe by text+options to avoid repeats in same test
+function _normQ(q){
+  const base = (q.q||"").toLowerCase().replace(/\s+/g,' ').trim();
+  const opts = Array.isArray(q.options) ? q.options.map(o=>String(o).toLowerCase().replace(/\s+/g,' ').trim()).join('|') : '';
+  return base + "||" + opts;
 }
+function _dedupeQuestions(arr){
+  const seen = new Set();
+  const out = [];
+  for(const q of arr){
+    const k=_normQ(q);
+    if(seen.has(k)) continue;
+    seen.add(k);
+    out.push(q);
+  }
+  return out;
+}
+function _esc(s){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+function _fmtTime(sec){ sec=Math.max(0,sec|0); const mm=Math.floor(sec/60); const ss=String(sec%60).padStart(2,'0'); return `${mm}:${ss}`; }
 
 const app={
-  state:{
-    mode:'practice',
-    pool:[],
-    idx:0,
-    answers:[],
-    flags:[],
-    orderMap:{},
-    used:JSON.parse(localStorage.getItem('ATPL_V22')||"[]"),
-    // exam session
-    startedAt:null,
-    timeLeftSec:null,
-    timerId:null,
-    submitted:false
-  },
+  state:{mode:'practice',pool:[],idx:0,answers:[],flags:[],orderMap:{},used:JSON.parse(localStorage.getItem('ATPL_V22')||"[]"),startedAt:null,timeLeftSec:null,timerId:null,submitted:false},
 
   init:function(){
     const dbInfo=document.getElementById('dbInfo');
     if(dbInfo) dbInfo.innerText=`Loaded: ${DB.length} Questions`;
 
+    // weak areas hint + toggle state
+    this._weakInit();
+
     const cnt=document.getElementById('cnt');
-    if(cnt){
-      cnt.style.cursor="pointer";
-      cnt.title="Tap to open Review (Exam Mode)";
-      cnt.onclick=()=>this.openReview();
-    }
+    if(cnt){ cnt.style.cursor="pointer"; cnt.title="Tap to open Review (Exam Mode)"; cnt.onclick=()=>this.openReview(); }
 
     const header=document.querySelector('header');
     if(header && !document.getElementById('cbtTimer')){
       const t=document.createElement('div');
       t.id="cbtTimer";
-      t.style.fontSize="12px";
-      t.style.color="var(--sub)";
-      t.style.marginLeft="10px";
-      t.style.minWidth="80px";
-      t.style.textAlign="right";
-
+      t.style.fontSize="12px"; t.style.color="var(--sub)"; t.style.marginLeft="10px";
+      t.style.minWidth="80px"; t.style.textAlign="right";
       const rightWrap=document.createElement('div');
-      rightWrap.style.display="flex";
-      rightWrap.style.alignItems="flex-end";
-      rightWrap.style.gap="10px";
-
+      rightWrap.style.display="flex"; rightWrap.style.alignItems="flex-end"; rightWrap.style.gap="10px";
       const cntEl=document.getElementById('cnt');
       cntEl.parentNode.insertBefore(rightWrap, cntEl);
       rightWrap.appendChild(cntEl);
@@ -537,18 +930,14 @@ const app={
     const nav=document.getElementById('nav');
     if(nav && !document.getElementById('btnFlag')){
       const btn=document.createElement('button');
-      btn.className="nav-btn";
-      btn.id="btnFlag";
-      btn.innerText="⚑";
-      btn.title="Flag question (Exam Mode)";
-      btn.onclick=()=>this.toggleFlag();
+      btn.className="nav-btn"; btn.id="btnFlag"; btn.innerText="⚑";
+      btn.title="Flag question (Exam Mode)"; btn.onclick=()=>this.toggleFlag();
       nav.insertBefore(btn, nav.lastElementChild);
     }
 
     if(!document.getElementById('reviewModal')){
       const m=document.createElement('div');
-      m.id="reviewModal";
-      m.className="modal";
+      m.id="reviewModal"; m.className="modal";
       m.onclick=(e)=>{ if(e.target===m) this.closeReview(); };
       m.innerHTML=`
         <div class="modal-card">
@@ -567,19 +956,17 @@ const app={
   setM:function(m){
     this.state.mode=m;
     document.querySelectorAll('.mode-btn').forEach(b=>b.className='mode-btn');
-
     const btn=document.getElementById('m-'+m);
-    if(btn){
-      btn.classList.add(m==='practice'?'active-practice':m==='formulas'?'active-formulas':'active-exam');
-    }
+    if(btn) btn.classList.add(m==='practice'?'active-practice':m==='formulas'?'active-formulas':'active-exam');
     document.body.className='mode-'+m;
 
     const startBtn=document.getElementById('btnStart');
-    if(startBtn){
-      startBtn.style.backgroundColor=m==='practice'?'var(--primary)':m==='formulas'?'var(--purple)':'var(--orange)';
-    }
+    if(startBtn) startBtn.style.backgroundColor=m==='practice'?'var(--primary)':m==='formulas'?'var(--purple)':'var(--orange)';
     const dif=document.getElementById('dif');
     if(dif) dif.style.display=(m==='practice')?'block':'none';
+
+    // refresh weak-toggle availability
+    this._weakInit();
   },
 
   start:function(){
@@ -587,24 +974,26 @@ const app={
     const difSel=document.getElementById('diff-sel');
     const dif=difSel?difSel.value:'medium';
 
-    let candidate=DB;
+    let candidate=_dedupeQuestions(DB);
 
     if(this.state.mode==='formulas'){
-      candidate=DB.filter(q=>q.topic==='Formulas');
+      candidate=candidate.filter(q=>q.topic==='Formulas');
     } else if(this.state.mode==='practice'){
-      const s=DB.filter(q=>q.level===dif);
+      const s=candidate.filter(q=>q.level===dif);
       if(s.length>=cnt) candidate=s;
     } else if(this.state.mode==='exam'){
-      candidate=DB.slice(); // mixed
+      candidate=candidate.slice();
     }
 
     candidate = candidate.slice().sort(()=>Math.random()-0.5);
 
-    // ✅ safe cap: if user selects huge number
+    // ✅ Optional: focus weak areas (no duplicates in a session)
+    candidate = this._applyWeakFocus(candidate);
+
     const take = Math.min(cnt, candidate.length);
 
     this.state.pool=candidate.slice(0,take);
-    this.state.answers=new Array(this.state.pool.length).fill(null); // store ORIGINAL indices
+    this.state.answers=new Array(this.state.pool.length).fill(null);
     this.state.flags=new Array(this.state.pool.length).fill(false);
     this.state.idx=0;
     this.state.orderMap={};
@@ -615,15 +1004,11 @@ const app={
       this.state.timeLeftSec=this.state.pool.length*CBT_SECONDS_PER_Q;
       this._startTimer();
       this._saveSession();
-    } else {
-      this._stopTimer();
-      this._clearSession();
-    }
+    } else { this._stopTimer(); this._clearSession(); }
 
     document.getElementById('view-home').classList.add('hidden');
     document.getElementById('view-quiz').classList.remove('hidden');
     document.getElementById('nav').classList.remove('hidden');
-
     this.load();
   },
 
@@ -633,34 +1018,25 @@ const app={
     const order=_getOrder(this.state, q);
 
     document.getElementById('cnt').innerText=`${this.state.idx+1} / ${this.state.pool.length}`;
-
     document.getElementById('qTop').innerText=q.topic;
     document.getElementById('qLvl').innerText=(q.level||"").toUpperCase();
-
     document.getElementById('qTxt').innerHTML=q.q;
 
-    const box=document.getElementById('opts');
-    box.innerHTML='';
-
-    const expl=document.getElementById('expl');
-    expl.classList.remove('show');
+    const box=document.getElementById('opts'); box.innerHTML='';
+    const expl=document.getElementById('expl'); expl.classList.remove('show');
 
     for(let dispIdx=0; dispIdx<q.options.length; dispIdx++){
       const origIdx=_dispToOrig(order, dispIdx);
-      const optText=q.options[origIdx];
-
       const d=document.createElement('div');
       d.className='option';
-      d.innerHTML=optText;
+      d.innerHTML=q.options[origIdx];
       d.onclick=()=>this.ans(dispIdx);
 
       if(this.state.mode==='exam'){
         if(a!==null && origIdx===a) d.classList.add('selected');
-      } else {
-        if(a!==null){
-          if(origIdx===q.ans) d.classList.add('correct');
-          else if(origIdx===a) d.classList.add('wrong');
-        }
+      } else if(a!==null){
+        if(origIdx===q.ans) d.classList.add('correct');
+        else if(origIdx===a) d.classList.add('wrong');
       }
       box.appendChild(d);
     }
@@ -670,35 +1046,19 @@ const app={
       expl.classList.add('show');
     }
 
-    // ✅ in exam: keep CBT feel during test (no solutions). Deep dive stays off during exam flow.
     const deepBtn=expl.querySelector('.btn-deep');
     if(deepBtn) deepBtn.style.display = (this.state.mode==='exam') ? 'none' : 'inline-block';
 
     const act=document.getElementById('act');
     const last=(this.state.idx===this.state.pool.length-1);
-    if(this.state.mode==='exam'){
-      act.innerText= last ? 'Submit' : 'Next';
-      act.style.backgroundColor = last ? 'var(--orange)' : 'var(--primary)';
-    } else {
-      act.innerText= last ? 'Finish' : 'Next';
-      act.style.backgroundColor = 'var(--primary)';
-    }
-
-    const prevBtn=document.querySelector('#nav .nav-btn');
-    if(prevBtn) prevBtn.style.opacity = (this.state.idx===0) ? 0.5 : 1;
+    if(this.state.mode==='exam'){ act.innerText= last ? 'Submit' : 'Next'; act.style.backgroundColor = last ? 'var(--orange)' : 'var(--primary)'; }
+    else { act.innerText= last ? 'Finish' : 'Next'; act.style.backgroundColor = 'var(--primary)'; }
 
     const f=document.getElementById('btnFlag');
-    if(f){
-      f.style.display = (this.state.mode==='exam') ? 'inline-flex' : 'none';
-      f.style.opacity = this.state.flags[this.state.idx] ? 1 : 0.55;
-      f.title = this.state.flags[this.state.idx] ? "Unflag question" : "Flag question";
-    }
+    if(f){ f.style.display = (this.state.mode==='exam') ? 'inline-flex' : 'none'; f.style.opacity = this.state.flags[this.state.idx] ? 1 : 0.55; }
 
     const timerEl=document.getElementById('cbtTimer');
-    if(timerEl){
-      timerEl.style.display = (this.state.mode==='exam') ? 'block' : 'none';
-      this._renderTimer();
-    }
+    if(timerEl){ timerEl.style.display = (this.state.mode==='exam') ? 'block' : 'none'; this._renderTimer(); }
 
     if(this.state.mode==='exam') this._saveSession();
   },
@@ -707,108 +1067,47 @@ const app={
     const q=this.state.pool[this.state.idx];
     const order=_getOrder(this.state, q);
     const origIdx=_dispToOrig(order, dispIdx);
-
     if(this.state.mode!=='exam' && this.state.answers[this.state.idx]!==null) return;
-
     this.state.answers[this.state.idx]=origIdx;
     this.load();
   },
 
-  next:function(){
-    if(this.state.idx < this.state.pool.length-1){
-      this.state.idx++;
-      this.load();
-    } else {
-      this.end();
-    }
-  },
-  back:function(){
-    if(this.state.idx>0){
-      this.state.idx--;
-      this.load();
-    }
-  },
+  next:function(){ if(this.state.idx < this.state.pool.length-1){ this.state.idx++; this.load(); } else { this.end(); } },
+  back:function(){ if(this.state.idx>0){ this.state.idx--; this.load(); } },
 
-  deep:function(){
-    const q=this.state.pool[this.state.idx];
-    document.getElementById('dp-txt').innerHTML = q.longExp || "No details.";
-    document.getElementById('mod').classList.add('open');
-  },
-  close:function(e){
-    if(!e || e.target===e.currentTarget || e.target.tagName==='BUTTON'){
-      document.getElementById('mod').classList.remove('open');
-    }
-  },
+  deep:function(){ const q=this.state.pool[this.state.idx]; document.getElementById('dp-txt').innerHTML=q.longExp||"No details."; document.getElementById('mod').classList.add('open'); },
+  close:function(e){ if(!e || e.target===e.currentTarget || e.target.tagName==='BUTTON'){ document.getElementById('mod').classList.remove('open'); } },
 
-  toggleFlag:function(){
-    if(this.state.mode!=='exam') return;
-    this.state.flags[this.state.idx] = !this.state.flags[this.state.idx];
-    this.load();
-  },
+  toggleFlag:function(){ if(this.state.mode!=='exam') return; this.state.flags[this.state.idx]=!this.state.flags[this.state.idx]; this.load(); },
 
   openReview:function(){
     if(this.state.mode!=='exam') return;
-    const m=document.getElementById('reviewModal');
-    if(!m) return;
-
+    const m=document.getElementById('reviewModal'); if(!m) return;
     const total=this.state.pool.length;
     const answered=this.state.answers.filter(x=>x!==null).length;
     const flagged=this.state.flags.filter(Boolean).length;
     const unanswered=total-answered;
 
-    const meta=document.getElementById('reviewMeta');
-    meta.innerHTML = `Answered: <strong>${answered}</strong> &nbsp;|&nbsp; Unanswered: <strong>${unanswered}</strong> &nbsp;|&nbsp; Flagged: <strong>${flagged}</strong>`;
-
-    const grid=document.getElementById('reviewGrid');
-    grid.innerHTML='';
+    document.getElementById('reviewMeta').innerHTML = `Answered: <strong>${answered}</strong> &nbsp;|&nbsp; Unanswered: <strong>${unanswered}</strong> &nbsp;|&nbsp; Flagged: <strong>${flagged}</strong>`;
+    const grid=document.getElementById('reviewGrid'); grid.innerHTML='';
 
     for(let i=0;i<total;i++){
       const btn=document.createElement('button');
-      btn.className='mode-btn';
-      btn.style.padding="12px 0";
-      btn.style.borderRadius="12px";
-      btn.style.fontWeight="700";
-      btn.style.fontSize="14px";
-      btn.style.boxShadow="none";
+      btn.className='mode-btn'; btn.style.padding="12px 0"; btn.style.borderRadius="12px"; btn.style.fontWeight="700"; btn.style.fontSize="14px"; btn.style.boxShadow="none";
+      const isCurrent=(i===this.state.idx), isAnswered=(this.state.answers[i]!==null), isFlagged=(this.state.flags[i]===true);
+      btn.style.border="2px solid transparent"; btn.style.background="var(--bg)"; btn.style.color="var(--text)";
+      let label=(i+1).toString(); if(isFlagged) label="⚑ "+label; btn.innerText=label;
 
-      const isCurrent = (i===this.state.idx);
-      const isAnswered = (this.state.answers[i]!==null);
-      const isFlagged = (this.state.flags[i]===true);
+      if(isCurrent){ btn.style.borderColor="var(--orange)"; btn.style.background="rgba(255,159,10,0.18)"; }
+      else if(isAnswered){ btn.style.borderColor="var(--ok)"; btn.style.background="rgba(52,199,89,0.14)"; }
+      else { btn.style.borderColor="var(--border)"; btn.style.opacity="0.9"; }
 
-      btn.style.border="2px solid transparent";
-      btn.style.background="var(--bg)";
-      btn.style.color="var(--text)";
-
-      let label = (i+1).toString();
-      if(isFlagged) label = "⚑ " + label;
-      btn.innerText = label;
-
-      if(isCurrent){
-        btn.style.borderColor="var(--orange)";
-        btn.style.background="rgba(255,159,10,0.18)";
-      } else if(isAnswered){
-        btn.style.borderColor="var(--ok)";
-        btn.style.background="rgba(52,199,89,0.14)";
-      } else {
-        btn.style.borderColor="var(--border)";
-        btn.style.background="rgba(255,255,255,0.02)";
-        btn.style.opacity="0.9";
-      }
-
-      btn.onclick=()=>{
-        this.state.idx=i;
-        this.closeReview();
-        this.load();
-      };
+      btn.onclick=()=>{ this.state.idx=i; this.closeReview(); this.load(); };
       grid.appendChild(btn);
     }
-
     m.classList.add('open');
   },
-  closeReview:function(){
-    const m=document.getElementById('reviewModal');
-    if(m) m.classList.remove('open');
-  },
+  closeReview:function(){ const m=document.getElementById('reviewModal'); if(m) m.classList.remove('open'); },
 
   end:function(){
     if(this.state.mode==='exam'){
@@ -817,26 +1116,13 @@ const app={
       const flagged=this.state.flags.filter(Boolean).length;
       const unanswered=total-answered;
 
-      const msg =
-        `Submit exam?\n\n` +
-        `Answered: ${answered}/${total}\n` +
-        `Unanswered: ${unanswered}\n` +
-        `Flagged: ${flagged}\n\n` +
-        `Tip: tap the counter (top-right) for Review grid.`;
-
+      const msg=`Submit exam?\n\nAnswered: ${answered}/${total}\nUnanswered: ${unanswered}\nFlagged: ${flagged}\n\nTip: tap the counter (top-right) for Review grid.`;
       if(!confirm(msg)) return;
-      this._stopTimer();
-      this.state.submitted=true;
-      this._clearSession();
+      this._stopTimer(); this.state.submitted=true; this._clearSession();
     }
 
-    let correct=0;
-    const wrongIdx=[];
-    this.state.answers.forEach((a,i)=>{
-      if(a===this.state.pool[i].ans) correct++;
-      else wrongIdx.push(i);
-    });
-
+    let correct=0; const wrongIdx=[];
+    this.state.answers.forEach((a,i)=>{ if(a===this.state.pool[i].ans) correct++; else wrongIdx.push(i); });
     const pct=Math.round((correct/this.state.pool.length)*100);
 
     document.getElementById('view-quiz').classList.add('hidden');
@@ -845,265 +1131,212 @@ const app={
 
     document.getElementById('score').innerText=pct+"%";
 
-    // ✅ PASS/FAIL (EASA style)
-    const pass = pct >= PASS_MARK;
-    const pf=document.getElementById('passFail');
-    pf.innerHTML = pass
+    const pass=pct>=PASS_MARK;
+    document.getElementById('passFail').innerHTML = pass
       ? `<span style="color:var(--ok)">PASS</span> <span style="color:var(--sub);font-weight:700">(${PASS_MARK}% required)</span>`
       : `<span style="color:var(--no)">FAIL</span> <span style="color:var(--sub);font-weight:700">(${PASS_MARK}% required)</span>`;
 
-    // ✅ Summary block
     const total=this.state.pool.length;
     const answered=this.state.answers.filter(x=>x!==null).length;
     const flagged=this.state.flags.filter(Boolean).length;
     const unanswered=total-answered;
 
-    let timeSpentSec = 0;
-    if(this.state.startedAt){
-      timeSpentSec = Math.floor((Date.now()-this.state.startedAt)/1000);
-    }
-    const timeLeft = (this.state.timeLeftSec!=null) ? this.state.timeLeftSec : null;
+    let timeSpentSec=0;
+    if(this.state.startedAt) timeSpentSec=Math.floor((Date.now()-this.state.startedAt)/1000);
+    const timeLeft=(this.state.timeLeftSec!=null)?this.state.timeLeftSec:null;
 
-    // topic breakdown (wrong)
     const counts={};
-    wrongIdx.forEach(i=>{
-      const t=this.state.pool[i].topic||"Other";
-      counts[t]=(counts[t]||0)+1;
-    });
+    wrongIdx.forEach(i=>{ const t=this.state.pool[i].topic||"Other"; counts[t]=(counts[t]||0)+1; });
     const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
 
     document.getElementById('perfSummary').innerHTML = `
       <div><strong>Session stats</strong></div>
       <div>Correct: <strong>${correct}</strong> / ${total}</div>
       <div>Answered: <strong>${answered}</strong> &nbsp;|&nbsp; Unanswered: <strong>${unanswered}</strong> &nbsp;|&nbsp; Flagged: <strong>${flagged}</strong></div>
-      ${this.state.mode==='exam'
-        ? `<div>Time spent: <strong>${_fmtTime(timeSpentSec)}</strong>${timeLeft!==null?` &nbsp;|&nbsp; Time left: <strong>${_fmtTime(timeLeft)}</strong>`:''}</div>`
-        : ''
-      }
-      ${sorted.length
-        ? `<div style="margin-top:10px"><strong>Weak areas (wrong answers)</strong><br>${sorted.slice(0,6).map(([t,n])=>`• ${_esc(t)}: ${n}`).join('<br>')}</div>`
-        : `<div style="margin-top:10px"><strong>Weak areas</strong><br>None 🎯</div>`
-      }
+      ${this.state.mode==='exam' ? `<div>Time spent: <strong>${_fmtTime(timeSpentSec)}</strong>${timeLeft!==null?` &nbsp;|&nbsp; Time left: <strong>${_fmtTime(timeLeft)}</strong>`:''}</div>` : ''}
+      ${sorted.length ? `<div style="margin-top:10px"><strong>Weak areas (wrong answers)</strong><br>${sorted.slice(0,6).map(([t,n])=>`• ${_esc(t)}: ${n}`).join('<br>')}</div>` : `<div style="margin-top:10px"><strong>Weak areas</strong><br>None 🎯</div>`}
     `;
 
-    // ✅ Wrong questions review (learning)
     this._renderWrongReview(wrongIdx);
   },
 
   _renderWrongReview:function(wrongIdx){
-    const wrap=document.getElementById('wrongReviewWrap');
-    wrap.innerHTML='';
+    const wrap=document.getElementById('wrongReviewWrap'); wrap.innerHTML='';
+    if(!wrongIdx.length){ wrap.innerHTML=`<div style="margin-top:14px;color:var(--ok);font-weight:800">Perfect run. Nothing to review ✅</div>`; return; }
 
-    if(!wrongIdx.length){
-      wrap.innerHTML = `<div style="margin-top:14px;color:var(--ok);font-weight:800">Perfect run. Nothing to review ✅</div>`;
-      return;
-    }
-
-    // Header + toggle
     const head=document.createElement('div');
-    head.style.display="flex";
-    head.style.alignItems="center";
-    head.style.justifyContent="space-between";
-    head.style.gap="12px";
-    head.style.marginBottom="10px";
-    head.innerHTML = `
-      <div style="font-weight:900;font-size:16px">Review wrong answers (${wrongIdx.length})</div>
-      <button class="btn-deep" id="toggleWrong">Show</button>
-    `;
+    head.style.display="flex"; head.style.alignItems="center"; head.style.justifyContent="space-between"; head.style.gap="12px"; head.style.marginBottom="10px";
+    head.innerHTML = `<div style="font-weight:900;font-size:16px">Review wrong answers (${wrongIdx.length})</div><button class="btn-deep" id="toggleWrong">Show</button>`;
     wrap.appendChild(head);
 
-    const list=document.createElement('div');
-    list.id="wrongList";
-    list.style.display="none";
-    wrap.appendChild(list);
+    const list=document.createElement('div'); list.id="wrongList"; list.style.display="none"; wrap.appendChild(list);
+    document.getElementById('toggleWrong').onclick=()=>{ list.style.display=(list.style.display==='none')?'block':'none'; document.getElementById('toggleWrong').innerText=(list.style.display==='none')?'Show':'Hide'; };
 
-    document.getElementById('toggleWrong').onclick=()=>{
-      list.style.display = (list.style.display==='none') ? 'block' : 'none';
-      document.getElementById('toggleWrong').innerText = (list.style.display==='none') ? 'Show' : 'Hide';
-    };
-
-    // Build each wrong card
-    wrongIdx.forEach((qi, idx)=>{
+    wrongIdx.forEach((qi)=>{
       const q=this.state.pool[qi];
-      const userA=this.state.answers[qi]; // orig idx
-      const correctA=q.ans;
+      const userA=this.state.answers[qi], correctA=q.ans;
 
-      const card=document.createElement('div');
-      card.className='card';
-      card.style.marginBottom="14px";
-      card.style.boxShadow="0 2px 10px rgba(0,0,0,0.03)";
-
-      const top = `
-        <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:10px">
-          <div style="font-size:12px;color:var(--sub);font-weight:800;text-transform:uppercase">
-            ${_esc(q.topic)} • ${_esc((q.level||'').toUpperCase())} • Q${qi+1}
-          </div>
+      const card=document.createElement('div'); card.className='card'; card.style.marginBottom="14px"; card.style.boxShadow="0 2px 10px rgba(0,0,0,0.03)";
+      const top=`<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:10px">
+          <div style="font-size:12px;color:var(--sub);font-weight:800;text-transform:uppercase">${_esc(q.topic)} • ${_esc((q.level||'').toUpperCase())} • Q${qi+1}</div>
           <div style="font-size:12px;color:var(--no);font-weight:900">WRONG</div>
         </div>
-        <div style="font-size:16px;font-weight:800;line-height:1.35;margin-bottom:12px">${q.q}</div>
-      `;
+        <div style="font-size:16px;font-weight:800;line-height:1.35;margin-bottom:12px">${q.q}</div>`;
 
-      let optsHtml = '';
-      q.options.forEach((opt, oi)=>{
-        const isCorrect = (oi===correctA);
-        const isUser = (oi===userA);
-
-        let border = "2px solid transparent";
-        let bg = "var(--bg)";
-        let label = "";
-
-        if(isCorrect){
-          border = "2px solid var(--ok)";
-          bg = "rgba(52,199,89,0.12)";
-          label = " ✅ Correct";
-        }
-        if(isUser){
-          border = "2px solid var(--no)";
-          bg = "rgba(255,59,48,0.10)";
-          label = label ? label + " • Your choice" : " ❌ Your choice";
-        }
-
-        optsHtml += `
-          <div style="padding:12px;border-radius:12px;border:${border};background:${bg};margin-bottom:8px;font-size:14px;line-height:1.35">
-            ${_esc(opt)} <span style="color:var(--sub);font-weight:700;font-size:12px">${_esc(label)}</span>
-          </div>
-        `;
+      let optsHtml='';
+      q.options.forEach((opt,oi)=>{
+        const isCorrect=(oi===correctA), isUser=(oi===userA);
+        let border="2px solid transparent", bg="var(--bg)", label="";
+        if(isCorrect){ border="2px solid var(--ok)"; bg="rgba(52,199,89,0.12)"; label=" ✅ Correct"; }
+        if(isUser){ border="2px solid var(--no)"; bg="rgba(255,59,48,0.10)"; label = label ? label+" • Your choice" : " ❌ Your choice"; }
+        optsHtml += `<div style="padding:12px;border-radius:12px;border:${border};background:${bg};margin-bottom:8px;font-size:14px;line-height:1.35">${_esc(opt)} <span style="color:var(--sub);font-weight:700;font-size:12px">${_esc(label)}</span></div>`;
       });
 
-      // Explanations
-      const correctWhy = q.longExp || q.exp || "No explanation provided.";
-      // per-option rationale support (optional)
-      // If later you add q.rationale = { correct:"...", wrong:["...","...","...","..."] }, it will show here.
-      let whyOthers = '';
+      const correctWhy=q.longExp||q.exp||"No explanation provided.";
+      let whyOthers='';
       for(let oi=0; oi<q.options.length; oi++){
         if(oi===correctA) continue;
-
-        let w = '';
-        if(q.rationale && Array.isArray(q.rationale.wrong) && typeof q.rationale.wrong[oi]==='string'){
-          w = q.rationale.wrong[oi];
-        } else {
-          // fallback: still useful, but not per-distractor custom
-          w = `Incorrect because it does not match the core concept: ${q.exp || "see explanation above"}.`;
-        }
+        const w = (q.exp ? `Incorrect because it does not match the key idea: ${q.exp}` : "Incorrect (see explanation above).");
         whyOthers += `<li style="margin-bottom:6px"><strong>${_esc(q.options[oi])}</strong><br><span style="color:var(--sub)">${_esc(w)}</span></li>`;
       }
 
-      const expHtml = `
-        <div style="margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,204,0,0.12);border-left:4px solid #ffcc00">
+      const expHtml=`<div style="margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,204,0,0.12);border-left:4px solid #ffcc00">
           <div style="font-weight:900;margin-bottom:6px">Why the correct answer is correct</div>
           <div style="color:var(--text);line-height:1.5">${_esc(correctWhy)}</div>
-
           <div style="font-weight:900;margin:12px 0 6px 0">Why the other options are wrong</div>
           <ul style="padding-left:18px;margin:0;line-height:1.45">${whyOthers}</ul>
-        </div>
-      `;
+        </div>`;
 
       card.innerHTML = top + optsHtml + expHtml;
       list.appendChild(card);
     });
   },
+  // ---------- Focus weak areas (toggle on Home) ----------
+  _weakInit:function(){
+    const t=document.getElementById('weakToggle');
+    // hide toggle in formulas mode (and when stats empty, still allow)
+    const sync=()=>{
+      if(!t) return;
+      t.disabled = (this.state.mode==='formulas');
+      t.parentElement.style.opacity = t.disabled ? 0.5 : 1;
+    };
+    sync();
 
-  wipe:function(){
-    if(confirm("Reset?")){
-      localStorage.removeItem('ATPL_V22');
-      this._clearSession();
-      location.reload();
-    }
-  },
-  quit:function(){
-    if(this.state.mode==='exam'){
-      if(confirm("Exit exam? Progress will be lost.")){
-        this._stopTimer();
-        this._clearSession();
-        location.reload();
+    // show stats summary under DB info
+    try{
+      const s=this._loadStats();
+      const topics=Object.keys(s.topics||{});
+      const dbInfo=document.getElementById('dbInfo');
+      if(dbInfo){
+        if(topics.length){
+          const weak=this._weakTopics(3).map(x=>`${x.topic} (${Math.round(x.rate*100)}%)`).join(', ');
+          dbInfo.innerText = `Loaded: ${DB.length} Questions • Tracked topics: ${topics.length}` + (weak?` • Weak: ${weak}`:'');
+        } else {
+          dbInfo.innerText = `Loaded: ${DB.length} Questions • No history yet`;
+        }
       }
-    } else {
-      if(confirm("Exit?")) location.reload();
+    }catch(e){}
+  },
+
+  _loadStats:function(){
+    try{
+      const raw=localStorage.getItem(STATS_KEY);
+      if(!raw) return { topics:{} };
+      const s=JSON.parse(raw);
+      if(!s || typeof s!=='object') return { topics:{} };
+      if(!s.topics) s.topics={};
+      return s;
+    }catch(e){
+      return { topics:{} };
     }
   },
+  _saveStats:function(s){
+    try{ localStorage.setItem(STATS_KEY, JSON.stringify(s)); }catch(e){}
+  },
+  _weakTopics:function(limit){
+    const s=this._loadStats();
+    const arr=[];
+    const t=s.topics||{};
+    for(const k in t){
+      const a=t[k]?.attempts||0;
+      const w=t[k]?.wrong||0;
+      if(a<=0) continue;
+      const rate=w/a;
+      arr.push({topic:k, attempts:a, wrong:w, rate});
+    }
+    arr.sort((a,b)=> (b.rate-a.rate) || (b.wrong-a.wrong) || (b.attempts-a.attempts));
+    // ignore topics with too few attempts to be meaningful
+    const filtered=arr.filter(x=>x.attempts>=5 && x.rate>0);
+    return (filtered.length?filtered:arr).slice(0, limit||3);
+  },
+
+  _applyWeakFocus:function(candidate){
+    const t=document.getElementById('weakToggle');
+    const focus=!!(t && t.checked && !t.disabled);
+    this.state.focusWeak = focus;
+
+    if(!focus) return candidate;
+
+    const weak=this._weakTopics(3);
+    if(!weak.length) return candidate;
+
+    const weakSet=new Set(weak.map(x=>x.topic));
+    const weakPool=candidate.filter(q=>weakSet.has(q.topic));
+    const rest=candidate.filter(q=>!weakSet.has(q.topic));
+
+    // Weighting: aim ~70% from weak pool when possible
+    const totalNeed = Math.min(parseInt(document.getElementById('num-sel').value,10), candidate.length);
+    const weakNeed = Math.min(weakPool.length, Math.ceil(totalNeed*0.7));
+    const restNeed = Math.max(0, totalNeed-weakNeed);
+
+    const out=[];
+    out.push(...weakPool.slice().sort(()=>Math.random()-0.5).slice(0, weakNeed));
+    out.push(...rest.slice().sort(()=>Math.random()-0.5).slice(0, restNeed));
+    return out;
+  },
+
+  _updateStatsAfterSession:function(){
+    // Update stats based on answered questions only (exam/practice/formulas)
+    const s=this._loadStats();
+    if(!s.topics) s.topics={};
+
+    for(let i=0;i<this.state.pool.length;i++){
+      const q=this.state.pool[i];
+      const a=this.state.answers[i];
+      if(a===null) continue; // unanswered -> don't train stats
+      const topic=q.topic || "Other";
+      if(!s.topics[topic]) s.topics[topic]={attempts:0, wrong:0};
+      s.topics[topic].attempts += 1;
+      if(a!==q.ans) s.topics[topic].wrong += 1;
+    }
+    this._saveStats(s);
+  },
+
+
+  wipe:function(){ if(confirm("Reset?")){ localStorage.removeItem('ATPL_V22'); this._clearSession(); location.reload(); } },
+  quit:function(){ if(this.state.mode==='exam'){ if(confirm("Exit exam? Progress will be lost.")){ this._stopTimer(); this._clearSession(); location.reload(); } } else { if(confirm("Exit?")) location.reload(); } },
 
   _startTimer:function(){
-    this._stopTimer();
-    this._renderTimer();
+    this._stopTimer(); this._renderTimer();
     this.state.timerId=setInterval(()=>{
-      if(this.state.mode!=='exam') return;
-      if(this.state.timeLeftSec===null) return;
+      if(this.state.mode!=='exam' || this.state.timeLeftSec===null) return;
       this.state.timeLeftSec=Math.max(0, this.state.timeLeftSec-1);
       this._renderTimer();
-      if(this.state.timeLeftSec<=0){
-        this._stopTimer();
-        alert("Time is up. Submitting now.");
-        this.end();
-      }
+      if(this.state.timeLeftSec<=0){ this._stopTimer(); alert("Time is up. Submitting now."); this.end(); }
       this._saveSession();
     },1000);
   },
-  _stopTimer:function(){
-    if(this.state.timerId){
-      clearInterval(this.state.timerId);
-      this.state.timerId=null;
-    }
-  },
-  _renderTimer:function(){
-    const el=document.getElementById('cbtTimer');
-    if(!el || this.state.mode!=='exam') return;
-    el.innerText=`⏱ ${_fmtTime(this.state.timeLeftSec ?? 0)}`;
-  },
+  _stopTimer:function(){ if(this.state.timerId){ clearInterval(this.state.timerId); this.state.timerId=null; } },
+  _renderTimer:function(){ const el=document.getElementById('cbtTimer'); if(!el || this.state.mode!=='exam') return; el.innerText=`⏱ ${_fmtTime(this.state.timeLeftSec ?? 0)}`; },
 
   _saveSession:function(){
     if(this.state.mode!=='exam') return;
     try{
-      const payload={
-        mode:this.state.mode,
-        idx:this.state.idx,
-        poolIds:this.state.pool.map(q=>q.id),
-        answers:this.state.answers,
-        flags:this.state.flags,
-        orderMap:this.state.orderMap,
-        timeLeftSec:this.state.timeLeftSec,
-        startedAt:this.state.startedAt
-      };
+      const payload={mode:this.state.mode,idx:this.state.idx,poolIds:this.state.pool.map(q=>q.id),answers:this.state.answers,flags:this.state.flags,orderMap:this.state.orderMap,timeLeftSec:this.state.timeLeftSec,startedAt:this.state.startedAt};
       localStorage.setItem(LS_KEY, JSON.stringify(payload));
     }catch(e){}
   },
-  _clearSession:function(){
-    try{ localStorage.removeItem(LS_KEY); }catch(e){}
-  },
-
-  tryResumeExam:function(){
-    try{
-      const raw=localStorage.getItem(LS_KEY);
-      if(!raw) return false;
-      const s=JSON.parse(raw);
-      if(!s || s.mode!=='exam' || !Array.isArray(s.poolIds)) return false;
-
-      const map=new Map(DB.map(q=>[q.id,q]));
-      const rebuilt=s.poolIds.map(id=>map.get(id)).filter(Boolean);
-      if(rebuilt.length!==s.poolIds.length) return false;
-
-      this.state.mode='exam';
-      this.setM('exam');
-
-      this.state.pool=rebuilt;
-      this.state.idx=s.idx||0;
-      this.state.answers=s.answers||new Array(rebuilt.length).fill(null);
-      this.state.flags=s.flags||new Array(rebuilt.length).fill(false);
-      this.state.orderMap=s.orderMap||{};
-      this.state.timeLeftSec=typeof s.timeLeftSec==='number'?s.timeLeftSec:rebuilt.length*CBT_SECONDS_PER_Q;
-      this.state.startedAt=s.startedAt||Date.now();
-      this.state.submitted=false;
-
-      document.getElementById('view-home').classList.add('hidden');
-      document.getElementById('view-quiz').classList.remove('hidden');
-      document.getElementById('nav').classList.remove('hidden');
-
-      this._startTimer();
-      this.load();
-      return true;
-    }catch(e){
-      return false;
-    }
-  }
+  _clearSession:function(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} }
 };
 
 app.init();
