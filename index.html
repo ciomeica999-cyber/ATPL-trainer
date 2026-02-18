@@ -376,86 +376,556 @@ const DB = [
     ans:0, exp:"a ∝ √T.", longExp:"a = √(γRT). Pressure cancels via ideal gas law."
   }
 ];
+// ---------- helpers: stable shuffle per question ----------
+function _shuffleInPlace(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function _getOrder(state, q){
+  if(!state.orderMap) state.orderMap = {};
+  if(state.orderMap[q.id]) return state.orderMap[q.id];
+  const order=[0,1,2,3];
+  _shuffleInPlace(order);
+  state.orderMap[q.id]=order;
+  return order;
+}
+function _dispToOrig(order, dispIdx){ return order[dispIdx]; }
+function _origToDisp(order, origIdx){ return order.indexOf(origIdx); }
+
+// ---------- CBT exam config ----------
+const CBT_SECONDS_PER_Q = 60; // change to taste (e.g. 75, 90)
+const LS_KEY = "ATPL_V22_STATE_CBT"; // session persistence (optional)
 
 const app={
-state:{mode:'practice',pool:[],idx:0,answers:[],used:JSON.parse(localStorage.getItem('ATPL_V22')||"[]")},
-init:function(){document.getElementById('dbInfo').innerText=`Loaded: ${DB.length} Questions`},
-setM:function(m){
-this.state.mode=m;
-document.querySelectorAll('.mode-btn').forEach(b=>b.className='mode-btn');
-document.getElementById('m-'+m).classList.add('active-'+m);
-document.body.className='mode-'+m;
-const b=document.getElementById('btnStart');
-b.style.backgroundColor=m==='practice'?'var(--primary)':m==='formulas'?'var(--purple)':'var(--orange)';
-document.getElementById('dif').style.display=m==='practice'?'block':'none';
-},
-start:function(){
-const cnt=parseInt(document.getElementById('num-sel').value);
-const dif=document.getElementById('diff-sel').value;
-let c=DB;
-if(this.state.mode==='formulas')c=DB.filter(q=>q.topic==='Formulas');
-else if(this.state.mode==='practice'){let s=DB.filter(q=>q.level===dif);if(s.length>4)c=s}
-c.sort(()=>Math.random()-0.5);
-this.state.pool=c.slice(0,cnt);
-this.state.answers=new Array(this.state.pool.length).fill(null);
-this.state.idx=0;
-document.getElementById('view-home').classList.add('hidden');
-document.getElementById('view-quiz').classList.remove('hidden');
-document.getElementById('nav').classList.remove('hidden');
-this.load();
-},
-load:function(){
-const q=this.state.pool[this.state.idx];
-const a=this.state.answers[this.state.idx];
-document.getElementById('cnt').innerText=`${this.state.idx+1} / ${this.state.pool.length}`;
-document.getElementById('qTop').innerText=q.topic;
-document.getElementById('qLvl').innerText=q.level.toUpperCase();
-document.getElementById('qTxt').innerHTML=q.q;
-const b=document.getElementById('opts');b.innerHTML='';
-document.getElementById('expl').classList.remove('show');
-q.options.forEach((o,i)=>{
-const d=document.createElement('div');d.className='option';d.innerHTML=o;
-d.onclick=()=>this.ans(i);
-if(this.state.mode!=='exam'){
-if(a!==null){if(i===q.ans)d.classList.add('correct');else if(i===a)d.classList.add('wrong')}
-}else if(a===i)d.classList.add('selected');
-b.appendChild(d);
-});
-if(this.state.mode!=='exam'&&a!==null){
-document.getElementById('sh-exp').innerHTML=`<strong>Answer:</strong> ${q.exp}`;
-document.getElementById('expl').classList.add('show');
-}
-const act=document.getElementById('act');
-act.innerText=(this.state.idx===this.state.pool.length-1)?(this.state.mode==='exam'?'Submit':'Finish'):'Next';
-if(this.state.mode==='exam'&&this.state.idx===this.state.pool.length-1)act.style.backgroundColor='var(--orange)';
-},
-ans:function(i){
-if(this.state.mode!=='exam'&&this.state.answers[this.state.idx]!==null)return;
-this.state.answers[this.state.idx]=i;
-this.load();
-},
-deep:function(){
-const q=this.state.pool[this.state.idx];
-document.getElementById('dp-txt').innerHTML=q.longExp||"No details.";
-document.getElementById('mod').classList.add('open');
-},
-close:function(e){if(!e||e.target===e.currentTarget||e.target.tagName==='BUTTON')document.getElementById('mod').classList.remove('open')},
-next:function(){if(this.state.idx<this.state.pool.length-1){this.state.idx++;this.load()}else this.end()},
-back:function(){if(this.state.idx>0){this.state.idx--;this.load()}},
-end:function(){
-if(this.state.mode==='exam'&&!confirm("Submit?"))return;
-let c=0;this.state.answers.forEach((a,i)=>{if(a===this.state.pool[i].ans)c++});
-const p=Math.round((c/this.state.pool.length)*100);
-document.getElementById('view-quiz').classList.add('hidden');
-document.getElementById('nav').classList.add('hidden');
-document.getElementById('view-res').classList.remove('hidden');
-document.getElementById('score').innerText=p+"%";
-},
-wipe:function(){if(confirm("Reset?")){localStorage.removeItem('ATPL_V22');location.reload()}},
-quit:function(){if(confirm("Exit?"))location.reload()}
+  state:{
+    mode:'practice',
+    pool:[],
+    idx:0,
+    answers:[],
+    flags:[],
+    orderMap:{},
+    used:JSON.parse(localStorage.getItem('ATPL_V22')||"[]"),
+    // exam session
+    startedAt:null,
+    timeLeftSec:null,
+    timerId:null,
+    submitted:false
+  },
+
+  // ---------- init UI additions without touching HTML ----------
+  init:function(){
+    // DB info
+    const dbInfo=document.getElementById('dbInfo');
+    if(dbInfo) dbInfo.innerText=`Loaded: ${DB.length} Questions`;
+
+    // Make counter clickable to open CBT review grid (only in exam)
+    const cnt=document.getElementById('cnt');
+    if(cnt){
+      cnt.style.cursor="pointer";
+      cnt.title="Tap to open Review (Exam Mode)";
+      cnt.onclick=()=>this.openReview();
+    }
+
+    // Add small timer element in header (right side under/near cnt)
+    const header=document.querySelector('header');
+    if(header && !document.getElementById('cbtTimer')){
+      const t=document.createElement('div');
+      t.id="cbtTimer";
+      t.style.fontSize="12px";
+      t.style.color="var(--sub)";
+      t.style.marginLeft="10px";
+      t.style.minWidth="70px";
+      t.style.textAlign="right";
+      // put it next to cnt
+      const rightWrap=document.createElement('div');
+      rightWrap.style.display="flex";
+      rightWrap.style.alignItems="flex-end";
+      rightWrap.style.gap="10px";
+      // move existing cnt into wrapper
+      const cntEl=document.getElementById('cnt');
+      cntEl.parentNode.insertBefore(rightWrap, cntEl);
+      rightWrap.appendChild(cntEl);
+      rightWrap.appendChild(t);
+    }
+
+    // Add flag button in nav (between Next and Quit) via JS
+    const nav=document.getElementById('nav');
+    if(nav && !document.getElementById('btnFlag')){
+      const btn=document.createElement('button');
+      btn.className="nav-btn";
+      btn.id="btnFlag";
+      btn.innerText="⚑";
+      btn.title="Flag question (Exam Mode)";
+      btn.onclick=()=>this.toggleFlag();
+      // nav structure: [Prev][Next][Quit]
+      // insert before Quit
+      nav.insertBefore(btn, nav.lastElementChild);
+    }
+
+    // Create Review modal (grid) via JS (no HTML edits)
+    if(!document.getElementById('reviewModal')){
+      const m=document.createElement('div');
+      m.id="reviewModal";
+      m.className="modal";
+      m.onclick=(e)=>{ if(e.target===m) this.closeReview(); };
+      m.innerHTML=`
+        <div class="modal-card">
+          <h2 style="color:var(--orange);margin-top:0">Review</h2>
+          <div id="reviewMeta" style="color:var(--sub);font-size:13px;margin-bottom:12px"></div>
+          <div id="reviewLegend" style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-bottom:12px">
+            <span>🟧 Current</span><span>✅ Answered</span><span>⬜ Unanswered</span><span>⚑ Flagged</span>
+          </div>
+          <div id="reviewGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px"></div>
+          <button class="btn-start" style="margin-top:18px;background:var(--orange)" onclick="app.closeReview()">Close</button>
+        </div>`;
+      document.body.appendChild(m);
+    }
+  },
+
+  // ---------- mode switching ----------
+  setM:function(m){
+    this.state.mode=m;
+    document.querySelectorAll('.mode-btn').forEach(b=>b.className='mode-btn');
+
+    // safeguard: not all have active-xxx class in your CSS for exam/formulas row
+    const btn=document.getElementById('m-'+m);
+    if(btn){
+      btn.classList.add(m==='practice'?'active-practice':m==='formulas'?'active-formulas':'active-exam');
+    }
+    document.body.className='mode-'+m;
+
+    const startBtn=document.getElementById('btnStart');
+    if(startBtn){
+      startBtn.style.backgroundColor=m==='practice'?'var(--primary)':m==='formulas'?'var(--purple)':'var(--orange)';
+    }
+    const dif=document.getElementById('dif');
+    if(dif) dif.style.display=(m==='practice')?'block':'none';
+  },
+
+  // ---------- start session ----------
+  start:function(){
+    const cnt=parseInt(document.getElementById('num-sel').value,10);
+    const difSel=document.getElementById('diff-sel');
+    const dif=difSel?difSel.value:'medium';
+
+    let candidate=DB;
+
+    if(this.state.mode==='formulas'){
+      candidate=DB.filter(q=>q.topic==='Formulas');
+    } else if(this.state.mode==='practice'){
+      const s=DB.filter(q=>q.level===dif);
+      if(s.length>=cnt) candidate=s;
+    } else if(this.state.mode==='exam'){
+      // exam: mixed difficulty by default (more CBT-like)
+      candidate=DB.slice();
+    }
+
+    candidate = candidate.slice().sort(()=>Math.random()-0.5);
+    this.state.pool=candidate.slice(0,cnt);
+    this.state.answers=new Array(this.state.pool.length).fill(null); // store ORIGINAL indices
+    this.state.flags=new Array(this.state.pool.length).fill(false);
+    this.state.idx=0;
+    this.state.orderMap={};
+    this.state.submitted=false;
+
+    // exam timer setup
+    if(this.state.mode==='exam'){
+      this.state.startedAt=Date.now();
+      this.state.timeLeftSec=this.state.pool.length*CBT_SECONDS_PER_Q;
+      this._startTimer();
+      this._saveSession();
+    } else {
+      this._stopTimer();
+      this._clearSession();
+    }
+
+    document.getElementById('view-home').classList.add('hidden');
+    document.getElementById('view-quiz').classList.remove('hidden');
+    document.getElementById('nav').classList.remove('hidden');
+
+    this.load();
+  },
+
+  // ---------- load question ----------
+  load:function(){
+    const q=this.state.pool[this.state.idx];
+    const a=this.state.answers[this.state.idx];
+    const order=_getOrder(this.state, q);
+
+    // header count
+    document.getElementById('cnt').innerText=`${this.state.idx+1} / ${this.state.pool.length}`;
+
+    // top meta
+    document.getElementById('qTop').innerText=q.topic;
+    document.getElementById('qLvl').innerText=(q.level||"").toUpperCase();
+
+    // question text
+    document.getElementById('qTxt').innerHTML=q.q;
+
+    // options
+    const box=document.getElementById('opts');
+    box.innerHTML='';
+
+    // explanation area
+    const expl=document.getElementById('expl');
+    expl.classList.remove('show');
+
+    for(let dispIdx=0; dispIdx<q.options.length; dispIdx++){
+      const origIdx=_dispToOrig(order, dispIdx);
+      const optText=q.options[origIdx];
+
+      const d=document.createElement('div');
+      d.className='option';
+      d.innerHTML=optText;
+      d.onclick=()=>this.ans(dispIdx);
+
+      if(this.state.mode==='exam'){
+        // CBT: only show selection marker
+        if(a!==null && origIdx===a) d.classList.add('selected');
+      } else {
+        // practice/formulas: show correction after answer
+        if(a!==null){
+          if(origIdx===q.ans) d.classList.add('correct');
+          else if(origIdx===a) d.classList.add('wrong');
+        }
+      }
+      box.appendChild(d);
+    }
+
+    // practice/formulas show explanation only after answered
+    if(this.state.mode!=='exam' && a!==null){
+      document.getElementById('sh-exp').innerHTML=`<strong>Explanation:</strong> ${q.exp || ""}`;
+      expl.classList.add('show');
+    }
+
+    // deep dive button: hide in exam mode (CBT)
+    const deepBtn=expl.querySelector('.btn-deep');
+    if(deepBtn) deepBtn.style.display = (this.state.mode==='exam') ? 'none' : 'inline-block';
+
+    // action button text
+    const act=document.getElementById('act');
+    const last=(this.state.idx===this.state.pool.length-1);
+    if(this.state.mode==='exam'){
+      act.innerText= last ? 'Submit' : 'Next';
+      act.style.backgroundColor = last ? 'var(--orange)' : 'var(--primary)';
+    } else {
+      act.innerText= last ? 'Finish' : 'Next';
+      act.style.backgroundColor = 'var(--primary)';
+    }
+
+    // prev button disable feel (optional)
+    const prevBtn=document.querySelector('#nav .nav-btn');
+    if(prevBtn) prevBtn.style.opacity = (this.state.idx===0) ? 0.5 : 1;
+
+    // flag button state (exam only)
+    const f=document.getElementById('btnFlag');
+    if(f){
+      f.style.display = (this.state.mode==='exam') ? 'inline-flex' : 'none';
+      f.style.opacity = this.state.flags[this.state.idx] ? 1 : 0.55;
+      f.title = this.state.flags[this.state.idx] ? "Unflag question" : "Flag question";
+    }
+
+    // timer visibility
+    const timerEl=document.getElementById('cbtTimer');
+    if(timerEl){
+      timerEl.style.display = (this.state.mode==='exam') ? 'block' : 'none';
+      this._renderTimer();
+    }
+
+    if(this.state.mode==='exam') this._saveSession();
+  },
+
+  // ---------- answer selection ----------
+  ans:function(dispIdx){
+    const q=this.state.pool[this.state.idx];
+    const order=_getOrder(this.state, q);
+    const origIdx=_dispToOrig(order, dispIdx);
+
+    // In practice/formulas, lock after first answer
+    if(this.state.mode!=='exam' && this.state.answers[this.state.idx]!==null) return;
+
+    this.state.answers[this.state.idx]=origIdx;
+    this.load();
+  },
+
+  // ---------- navigation ----------
+  next:function(){
+    if(this.state.idx < this.state.pool.length-1){
+      this.state.idx++;
+      this.load();
+    } else {
+      this.end();
+    }
+  },
+  back:function(){
+    if(this.state.idx>0){
+      this.state.idx--;
+      this.load();
+    }
+  },
+
+  // ---------- deep dive ----------
+  deep:function(){
+    const q=this.state.pool[this.state.idx];
+    document.getElementById('dp-txt').innerHTML = q.longExp || "No details.";
+    document.getElementById('mod').classList.add('open');
+  },
+  close:function(e){
+    if(!e || e.target===e.currentTarget || e.target.tagName==='BUTTON'){
+      document.getElementById('mod').classList.remove('open');
+    }
+  },
+
+  // ---------- CBT: flag + review ----------
+  toggleFlag:function(){
+    if(this.state.mode!=='exam') return;
+    this.state.flags[this.state.idx] = !this.state.flags[this.state.idx];
+    this.load();
+  },
+
+  openReview:function(){
+    if(this.state.mode!=='exam') return;
+    const m=document.getElementById('reviewModal');
+    if(!m) return;
+
+    const total=this.state.pool.length;
+    const answered=this.state.answers.filter(x=>x!==null).length;
+    const flagged=this.state.flags.filter(Boolean).length;
+    const unanswered=total-answered;
+
+    const meta=document.getElementById('reviewMeta');
+    meta.innerHTML = `Answered: <strong>${answered}</strong> &nbsp;|&nbsp; Unanswered: <strong>${unanswered}</strong> &nbsp;|&nbsp; Flagged: <strong>${flagged}</strong>`;
+
+    const grid=document.getElementById('reviewGrid');
+    grid.innerHTML='';
+
+    for(let i=0;i<total;i++){
+      const btn=document.createElement('button');
+      btn.className='mode-btn';
+      btn.style.padding="12px 0";
+      btn.style.borderRadius="12px";
+      btn.style.fontWeight="700";
+      btn.style.fontSize="14px";
+      btn.style.boxShadow="none";
+
+      const isCurrent = (i===this.state.idx);
+      const isAnswered = (this.state.answers[i]!==null);
+      const isFlagged = (this.state.flags[i]===true);
+
+      // base style
+      btn.style.border="2px solid transparent";
+      btn.style.background="var(--bg)";
+      btn.style.color="var(--text)";
+
+      // decorate
+      let label = (i+1).toString();
+      if(isFlagged) label = "⚑ " + label;
+      btn.innerText = label;
+
+      if(isCurrent){
+        btn.style.borderColor="var(--orange)";
+        btn.style.background="rgba(255,159,10,0.18)";
+      } else if(isAnswered){
+        btn.style.borderColor="var(--ok)";
+        btn.style.background="rgba(52,199,89,0.14)";
+      } else {
+        btn.style.borderColor="var(--border)";
+        btn.style.background="rgba(255,255,255,0.02)";
+        btn.style.opacity="0.9";
+      }
+
+      btn.onclick=()=>{
+        this.state.idx=i;
+        this.closeReview();
+        this.load();
+      };
+      grid.appendChild(btn);
+    }
+
+    m.classList.add('open');
+  },
+  closeReview:function(){
+    const m=document.getElementById('reviewModal');
+    if(m) m.classList.remove('open');
+  },
+
+  // ---------- finish session ----------
+  end:function(){
+    if(this.state.mode==='exam'){
+      const total=this.state.pool.length;
+      const answered=this.state.answers.filter(x=>x!==null).length;
+      const flagged=this.state.flags.filter(Boolean).length;
+      const unanswered=total-answered;
+
+      const msg =
+        `Submit exam?\n\n` +
+        `Answered: ${answered}/${total}\n` +
+        `Unanswered: ${unanswered}\n` +
+        `Flagged: ${flagged}\n\n` +
+        `Tip: tap the counter (top-right) for Review grid.`;
+
+      if(!confirm(msg)) return;
+      this._stopTimer();
+      this.state.submitted=true;
+      this._clearSession();
+    }
+
+    // score
+    let correct=0;
+    this.state.answers.forEach((a,i)=>{
+      if(a===this.state.pool[i].ans) correct++;
+    });
+    const pct=Math.round((correct/this.state.pool.length)*100);
+
+    // show results
+    document.getElementById('view-quiz').classList.add('hidden');
+    document.getElementById('nav').classList.add('hidden');
+    document.getElementById('view-res').classList.remove('hidden');
+
+    // results text
+    document.getElementById('score').innerText=pct+"%";
+
+    // (optional) small coaching: weak topics
+    const wrongIdx=[];
+    for(let i=0;i<this.state.pool.length;i++){
+      if(this.state.answers[i]!==this.state.pool[i].ans) wrongIdx.push(i);
+    }
+    if(wrongIdx.length){
+      const counts={};
+      wrongIdx.forEach(i=>{
+        const t=this.state.pool[i].topic||"Other";
+        counts[t]=(counts[t]||0)+1;
+      });
+      const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,4);
+      const card=document.querySelector('#view-res .card');
+      let html=`<div style="margin-top:16px;color:var(--sub);font-size:13px;line-height:1.5;text-align:left">
+        <strong>Weak areas (review these):</strong><br>${sorted.map(([t,n])=>`• ${t}: ${n}`).join('<br>')}
+      </div>`;
+      card.insertAdjacentHTML('beforeend', html);
+    }
+  },
+
+  // ---------- quit/reset ----------
+  wipe:function(){
+    if(confirm("Reset?")){
+      localStorage.removeItem('ATPL_V22');
+      this._clearSession();
+      location.reload();
+    }
+  },
+  quit:function(){
+    if(this.state.mode==='exam'){
+      if(confirm("Exit exam? Progress will be lost.")){
+        this._stopTimer();
+        this._clearSession();
+        location.reload();
+      }
+    } else {
+      if(confirm("Exit?")) location.reload();
+    }
+  },
+
+  // ---------- timer ----------
+  _startTimer:function(){
+    this._stopTimer();
+    this._renderTimer();
+    this.state.timerId=setInterval(()=>{
+      if(this.state.mode!=='exam') return;
+      if(this.state.timeLeftSec===null) return;
+      this.state.timeLeftSec=Math.max(0, this.state.timeLeftSec-1);
+      this._renderTimer();
+      if(this.state.timeLeftSec<=0){
+        this._stopTimer();
+        alert("Time is up. Submitting now.");
+        this.end();
+      }
+      this._saveSession();
+    },1000);
+  },
+  _stopTimer:function(){
+    if(this.state.timerId){
+      clearInterval(this.state.timerId);
+      this.state.timerId=null;
+    }
+  },
+  _renderTimer:function(){
+    const el=document.getElementById('cbtTimer');
+    if(!el || this.state.mode!=='exam') return;
+    const s=this.state.timeLeftSec ?? 0;
+    const mm=Math.floor(s/60);
+    const ss=(s%60).toString().padStart(2,'0');
+    el.innerText=`⏱ ${mm}:${ss}`;
+  },
+
+  // ---------- session persistence (optional but stabilizes CBT feel) ----------
+  _saveSession:function(){
+    if(this.state.mode!=='exam') return;
+    try{
+      const payload={
+        mode:this.state.mode,
+        idx:this.state.idx,
+        poolIds:this.state.pool.map(q=>q.id),
+        answers:this.state.answers,
+        flags:this.state.flags,
+        orderMap:this.state.orderMap,
+        timeLeftSec:this.state.timeLeftSec,
+        startedAt:this.state.startedAt
+      };
+      localStorage.setItem(LS_KEY, JSON.stringify(payload));
+    }catch(e){}
+  },
+  _clearSession:function(){
+    try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  },
+
+  // Call this if you ever want “resume exam” later
+  tryResumeExam:function(){
+    try{
+      const raw=localStorage.getItem(LS_KEY);
+      if(!raw) return false;
+      const s=JSON.parse(raw);
+      if(!s || s.mode!=='exam' || !Array.isArray(s.poolIds)) return false;
+
+      // rebuild pool from DB ids
+      const map=new Map(DB.map(q=>[q.id,q]));
+      const rebuilt=s.poolIds.map(id=>map.get(id)).filter(Boolean);
+      if(rebuilt.length!==s.poolIds.length) return false;
+
+      this.state.mode='exam';
+      this.setM('exam');
+
+      this.state.pool=rebuilt;
+      this.state.idx=s.idx||0;
+      this.state.answers=s.answers||new Array(rebuilt.length).fill(null);
+      this.state.flags=s.flags||new Array(rebuilt.length).fill(false);
+      this.state.orderMap=s.orderMap||{};
+      this.state.timeLeftSec=typeof s.timeLeftSec==='number'?s.timeLeftSec:rebuilt.length*CBT_SECONDS_PER_Q;
+      this.state.startedAt=s.startedAt||Date.now();
+      this.state.submitted=false;
+
+      document.getElementById('view-home').classList.add('hidden');
+      document.getElementById('view-quiz').classList.remove('hidden');
+      document.getElementById('nav').classList.remove('hidden');
+
+      this._startTimer();
+      this.load();
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
 };
+
 app.init();
+
+// Optional: auto-resume if an exam session exists.
+// Uncomment if you want the CBT to reopen where you left it:
+// app.tryResumeExam();
 </script>
 </body>
 </html>
+
 
